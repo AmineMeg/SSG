@@ -1,0 +1,12 @@
+<html>
+  <head>
+    <title>{{ metadata.title }}</title>
+    <link rel="stylesheet" href="static/style.css">
+  </head>
+  <body>
+    <div id="menu">{{ include "menu.html" }}</div>
+    <h1>{{ metadata.title }}</h1>
+    <h2>{{ metadata.date }}</h2>
+    <div id="article">{{ content }}</div>
+  </body>
+</html>
