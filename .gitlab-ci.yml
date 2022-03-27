@@ -1,0 +1,113 @@
+# This file is a template, and might need editing before it works on your project.
+# This is the Gradle build system for JVM applications
+# https://gradle.org/
+# https://github.com/gradle/gradle
+image: gradle:alpine
+
+# Disable the Gradle daemon for Continuous Integration servers as correctness
+# is usually a priority over speed in CI environments. Using a fresh
+# runtime for each build is more reliable since the runtime is completely
+# isolated from any previous builds.
+variables:
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+  JACOCO_CSV_LOCATION: '$CI_PROJECT_DIR/app/build/jacocoCsv'
+
+
+services:
+  - docker:dind
+
+before_script:
+  - export GRADLE_USER_HOME=`pwd`/.gradle
+
+gradle-build:
+  stage: build
+  script: gradle --build-cache assemble
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    policy: push
+    paths:
+      - app/build
+      - .gradle
+
+unit-test:
+  stage: test
+  script: gradle test
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    policy: pull
+    paths:
+      - app/build
+      - .gradle
+
+
+checkstyle-test:
+  stage: test
+  script:
+    - gradle checkstyleMain
+    - gradle checkstyleTest
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    policy: pull
+    paths:
+      - app/build
+      - .gradle
+
+
+PMD-test:
+  stage: test
+  script:
+    - gradle pmdMain
+    - gradle pmdTest
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    policy: pull
+    paths:
+      - app/build
+      - .gradle
+
+spotbugs-test:
+  stage: test
+  script:
+    - gradle spotbugsMain
+    - gradle spotbugsTest
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    policy: pull
+    paths:
+      - app/build
+      - .gradle
+
+total-check:
+  stage: test
+  script:
+    - gradle check
+    - awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print covered, "/", instructions, " instructions covered"; print 100*covered/instructions, "% covered" }' $JACOCO_CSV_LOCATION
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    policy: pull
+    paths:
+      - app/build
+      - .gradle
+
+release:
+  stage: deploy
+  image: alpine:latest
+  when: manual
+
+  except:
+    - tags
+
+  only:
+    - master
+
+  script:
+    - apk --no-cache add curl
+    - sh deploy.sh
+
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    policy: pull
+    paths:
+      - app/build
+      - .gradle
+
