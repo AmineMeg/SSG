@@ -90,16 +90,6 @@ class BuildSiteTest {
     static final String dstDirectory = "dstDir/";
 
     /**
-     * filename for destination testFile.
-     */
-    static final String dstFileName = "index.html";
-
-    /**
-     * filename for destination testFiles.
-     */
-    static final String dstFileNameBis = "dodo.html";
-
-    /**
      * Log4J Logger.
      */
     private static final Logger logger = LogManager.getLogger();
@@ -178,16 +168,16 @@ class BuildSiteTest {
     void throwWhenAttemptingToConvertWhenThereIndexButNoSiteFile() {
         try {
             Files.createDirectory(Path.of(srcDirectory));
-            Files.createDirectory(Path.of(srcDirectory + CONTENTS + "/"));
-            Files.createFile(Path.of(srcDirectory + CONTENTS + "/" + INDEX_MD));
+            Files.createDirectory(Path.of(srcDirectory + CONTENTS));
+            Files.createFile(Path.of(srcDirectory + CONTENTS + INDEX_MD));
 
             assertThrows(NotConvertibleException.class,
                     () -> buildSite.createWebSite(
                             srcDirectory,
                             "_output/"),
                     "Attempt to convert when there is no site.toml or index.md in content");
-            Files.deleteIfExists(Path.of(srcDirectory + CONTENTS + "/" + INDEX_MD));
-            Files.deleteIfExists(Path.of(srcDirectory + CONTENTS + "/"));
+            Files.deleteIfExists(Path.of(srcDirectory + CONTENTS + INDEX_MD));
+            Files.deleteIfExists(Path.of(srcDirectory + CONTENTS));
             Files.deleteIfExists(Path.of(srcDirectory));
         } catch (Exception e) {
             fail(e);
@@ -222,9 +212,9 @@ class BuildSiteTest {
             //GIVEN
             initDirectory();
             doThrow(new Exception()).when(buildPage).run(srcDirectory
-                            + CONTENTS + "/"
+                            + CONTENTS
                             + INDEX_MD,
-                    dstDirectory + CONTENTS + "/" + dstFileName);
+                    dstDirectory + CONTENTS);
 
             //WHEN
             assertThrows(Exception.class, () -> buildSite.createWebSite(srcDirectory, dstDirectory),
@@ -232,15 +222,84 @@ class BuildSiteTest {
 
             //THEN
             verify(buildPage, times(1)).run(srcDirectory
-                            + CONTENTS + "/"
+                            + CONTENTS
                             + INDEX_MD,
-                    dstDirectory + CONTENTS + "/"  + dstFileName);
-            verify(staticFileHandler, times(0)).handle(STATIC, dstDirectory);
+                    dstDirectory + CONTENTS);
+            verify(staticFileHandler, times(0)).handle(srcDirectory + STATIC, dstDirectory);
 
             cleanTestDirectory();
         } catch (Exception e) {
             cleanTestDirectory();
             fail(e);
+        }
+    }
+
+    /**
+     * Test.
+     */
+    @Test
+    void testCreateWebSiteWithArbo() {
+
+        try {
+            //GIVEN
+            initDirectory();
+            Files.createDirectory(Path.of(srcDirectory + CONTENTS + subDirectory));
+            Files.createFile(Path.of(srcDirectory + CONTENTS + subDirectory + srcFileNameBis));
+            Files.createDirectory(Path.of(dstDirectory + CONTENTS + subDirectory));
+            Files.createFile(Path.of(dstDirectory + CONTENTS + subDirectory + srcFileNameBis));
+            doNothing().when(buildPage).run(srcDirectory
+                            + CONTENTS
+                            + INDEX_MD,
+                    dstDirectory + CONTENTS);
+            doNothing()
+                    .when(buildPage)
+                    .run(srcDirectory + CONTENTS + subDirectory + srcFileNameBis,
+                            dstDirectory + CONTENTS + subDirectory);
+            doNothing().when(staticFileHandler).handle(srcDirectory + STATIC, dstDirectory);
+
+            //WHEN
+            buildSite.createWebSite(srcDirectory, dstDirectory);
+
+            //THEN
+            verify(buildPage, times(1)).run(srcDirectory
+                            + CONTENTS
+                            + INDEX_MD,
+                    dstDirectory + CONTENTS);
+            verify(buildPage,times(1))
+                    .run(srcDirectory + CONTENTS + subDirectory + srcFileNameBis,
+                            dstDirectory + CONTENTS + subDirectory);
+            verify(staticFileHandler, times(1)).handle(srcDirectory + STATIC, dstDirectory);
+
+            cleanTestDirectory();
+        } catch (Exception e) {
+            cleanTestDirectory();
+        }
+    }
+
+    @Test
+    void testCreateWebSite() {
+        try {
+            //GIVEN
+            initDirectory();
+            doNothing().when(buildPage).run(srcDirectory
+                            + CONTENTS
+                            + INDEX_MD,
+                    dstDirectory + CONTENTS);
+            doNothing().when(staticFileHandler).handle(srcDirectory + STATIC, dstDirectory);
+
+            //WHEN
+            buildSite.createWebSite(srcDirectory, dstDirectory);
+
+            //THEN
+            verify(buildPage, times(1)).run(srcDirectory
+                            + CONTENTS
+                            + INDEX_MD,
+                    dstDirectory + CONTENTS);
+            verify(staticFileHandler, times(1)).handle(srcDirectory + STATIC, dstDirectory);
+
+            cleanTestDirectory();
+        } catch (Exception e) {
+            cleanTestDirectory();
         }
     }
 
@@ -254,26 +313,10 @@ class BuildSiteTest {
         try {
 
             Files.createDirectory(Path.of(srcDirectory));
-            Files.createDirectory(Path.of(dstDirectory));
             Files.createFile(Path.of(srcDirectory + SITE_TOML));
-            Files.createDirectory(Path.of(srcDirectory + CONTENTS + "/"));
-            Files.createDirectory(Path.of(dstDirectory + CONTENTS + "/"));
-            Files.createFile(Path.of(srcDirectory + CONTENTS + "/" + INDEX_MD));
-            Files.createFile(Path.of(dstDirectory + CONTENTS + "/"  + dstFileName));
+            Files.createDirectory(Path.of(srcDirectory + CONTENTS));
+            Files.createFile(Path.of(srcDirectory + CONTENTS + INDEX_MD));
             Files.createDirectory(Path.of(srcDirectory + STATIC));
-            Files.createDirectory(Path.of(dstDirectory + STATIC));
-            Files.createDirectory(Path.of(srcDirectory + CONTENTS + "/"  + subDirectory));
-            Files.createFile(Path.of(srcDirectory
-                    + CONTENTS + "/"
-                    + subDirectory
-                    + srcFileNameBis));
-            Files.createDirectory(Path.of(dstDirectory + CONTENTS + "/" + subDirectory));
-            Files.createFile(Path.of(dstDirectory
-                    + CONTENTS + "/"
-                    + subDirectory
-                    + dstFileNameBis));
-
-
 
             logger.info("initDirectory() : directory create successfully");
 
@@ -281,46 +324,6 @@ class BuildSiteTest {
             logger.error("initDirectory() : "
                     +
                 "exception raise while create directory", e);
-            fail(e);
-        }
-    }
-
-    /**
-     * Test.
-     */
-    @Test
-    void testCreateWebSite() {
-
-        try {
-            //GIVEN
-            initDirectory();
-            doNothing().when(buildPage).run(srcDirectory
-                            + CONTENTS + "/"
-                            + INDEX_MD,
-                    dstDirectory + CONTENTS + "/" + dstFileName);
-            doNothing().when(staticFileHandler).handle(STATIC, dstDirectory);
-            doNothing()
-                    .when(buildPage)
-                    .run(srcDirectory + CONTENTS + "/" + subDirectory + srcFileNameBis,
-                    dstDirectory + CONTENTS + "/" + subDirectory + dstFileNameBis);
-
-            //WHEN
-            buildSite.createWebSite(srcDirectory, dstDirectory);
-
-            //THEN
-            verify(buildPage, times(1)).run(srcDirectory
-                            + CONTENTS + "/"
-                            + INDEX_MD,
-                    dstDirectory + CONTENTS + "/"  + dstFileName);
-            verify(staticFileHandler, times(1)).handle(STATIC, dstDirectory);
-            verify(buildPage,times(1))
-                    .run(srcDirectory + CONTENTS + "/" + subDirectory + srcFileNameBis,
-                    dstDirectory + CONTENTS + "/"  + subDirectory + dstFileNameBis);
-
-            cleanTestDirectory();
-        } catch (Exception e) {
-            cleanTestDirectory();
-            fail(e);
         }
     }
 
@@ -331,25 +334,27 @@ class BuildSiteTest {
         logger.info("cleanTestDirectory() : attempt to clear test directory");
 
         try {
-            Files.deleteIfExists(Path.of(dstDirectory + CONTENTS + "/"
-                    + subDirectory + dstFileNameBis));
-            Files.deleteIfExists(Path.of(srcDirectory + CONTENTS + "/"
-                    + subDirectory + srcFileNameBis));
-            Files.deleteIfExists(Path.of(srcDirectory + CONTENTS + "/"  + subDirectory));
-            Files.deleteIfExists(Path.of(dstDirectory + CONTENTS + "/" + subDirectory));
-            Files.deleteIfExists(Path.of(srcDirectory + CONTENTS + "/" + INDEX_MD));
-            Files.deleteIfExists(Path.of(dstDirectory + CONTENTS + "/"  + dstFileName));
-            Files.deleteIfExists(Path.of(srcDirectory + CONTENTS + "/"));
-            Files.deleteIfExists(Path.of(dstDirectory + CONTENTS + "/"));
+            Files.deleteIfExists(Path.of(dstDirectory
+                    + CONTENTS
+                    + subDirectory));
+            Files.deleteIfExists(Path.of(srcDirectory
+                    + CONTENTS
+                    + subDirectory
+                    + srcFileNameBis));
+            Files.deleteIfExists(Path.of(dstDirectory + CONTENTS + subDirectory));
+            Files.deleteIfExists(Path.of(srcDirectory + CONTENTS + INDEX_MD));
+            Files.deleteIfExists(Path.of(dstDirectory + CONTENTS));
+            Files.deleteIfExists(Path.of(srcDirectory + CONTENTS + subDirectory));
             Files.deleteIfExists(Path.of(srcDirectory + SITE_TOML));
+            Files.deleteIfExists(Path.of(srcDirectory + CONTENTS));
+            Files.deleteIfExists(Path.of(dstDirectory + CONTENTS));
             Files.deleteIfExists(Path.of(srcDirectory + STATIC));
             Files.deleteIfExists(Path.of(dstDirectory + STATIC));
             Files.deleteIfExists(Path.of(srcDirectory));
             Files.deleteIfExists(Path.of(dstDirectory));
 
 
-
-            logger.info("cleanTestDirectory() : cleaning is successfully");
+            logger.info("cleanTestDirectory() : cleaning is successful");
 
         } catch (IOException e) {
             logger.error("cleanTestDirectory() : "

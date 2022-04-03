@@ -67,29 +67,6 @@ class CommandSsgBuildTest {
                 "output dir was specified but didn't get the expected value");
     }
 
-    /**
-     * Test exit code is 2 (Invalid Input) when no input is given.
-     */
-    @Test
-    void exitCodeOnNoInputTest() {
-        CommandSsgBuild commandSsgBuild = new CommandSsgBuild();
-        int exitCode = new CommandLine(commandSsgBuild).execute();
-        assertEquals(2,exitCode,
-                "Expected exit code was 2");
-
-    }
-
-    /**
-     * Test exit code is 2 (Invalid Input) when no input is given.
-     */
-    @Test
-    void exitCodeOnNoFileSpecifiedTest() {
-        CommandSsgBuild commandSsgBuild = new CommandSsgBuild();
-        int exitCode = new CommandLine(commandSsgBuild).execute("--output-dir=testDir/");
-        assertEquals(2,exitCode,
-                "Expected exit code was 2");
-
-    }
 
     /**
      * Test positional parameter files are stored properly.

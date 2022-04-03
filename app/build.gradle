@@ -68,6 +68,10 @@ application {
     mainClass = 'ssg.App'
 }
 
+startScripts {
+    applicationName = 'ssg'
+}
+
 checkstyle {
     toolVersion = '10.0'
     configFile = file("${rootDir}/app/config/checkstyle/google_checks.xml")
@@ -127,6 +131,17 @@ jar {
                 'Multi-Release': 'true'
         )
     }
+    archivesBaseName = 'ssg'
 }
 
+distZip {
+    archiveName "ssg.zip"
+}
 
+shadowDistZip {
+    archiveName "ssg-compressed.zip"
+}
+
+startShadowScripts {
+    applicationName = 'ssg'
+}

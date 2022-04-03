@@ -24,13 +24,13 @@ public class StaticFileHandlerApache implements InterfaceStaticFileHandler {
 
     @Override
     public void handle(String staticSrcDirectory, String dstDirectory) throws IOException {
-        if (!STATIC.equals(staticSrcDirectory)) {
+        if (!(staticSrcDirectory.endsWith(STATIC))) {
             logger.error("Attempts to copy non static directory");
             return;
         }
         try {
             File sourceDirectory = new File(staticSrcDirectory);
-            File destinationDirectory = new File(dstDirectory + "static");
+            File destinationDirectory = new File(dstDirectory + STATIC);
             FileUtils.copyDirectory(sourceDirectory, destinationDirectory);
         } catch (IOException e) {
             logger.error("Failed to copy static directory", e);

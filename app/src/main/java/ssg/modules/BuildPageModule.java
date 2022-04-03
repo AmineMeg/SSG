@@ -3,6 +3,8 @@ package ssg.modules;
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 import ssg.Generated;
+import ssg.buildpage.BuildPage;
+import ssg.buildpage.BuildPageImplementation;
 import ssg.filereader.FileReader;
 import ssg.filereader.FileReaderImplementation;
 import ssg.filesplitter.FileSplitter;
@@ -26,6 +28,7 @@ public class BuildPageModule extends AbstractModule {
      */
     @Override
     protected void configure() {
+        bind(BuildPage.class).to(BuildPageImplementation.class);
         bind(FileReader.class)
                 .annotatedWith(Names.named("FileReader"))
                 .to(FileReaderImplementation.class);

@@ -1,0 +1,7 @@
+.gitlab-ci-release-template:
+  script:
+    - |
+      curl --header "PRIVATE-TOKEN: 3AZgFN33XZQpQahwmzo4" \
+                --data name="ssg $CI_COMMIT_TAG" \
+                --data url=$ARTIFACTS_URL \
+                --request POST https://gaufre.informatique.univ-paris-diderot.fr/api/v4/projects/${CI_PROJECT_ID}/releases/${CI_COMMIT_TAG}/assets/links
