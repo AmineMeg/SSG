@@ -1,0 +1,17 @@
+# Gitlab ci-cd variables
+# Ce fichier content toutes les variables environment de notre projet
+
+variables:
+
+  # Disable the Gradle daemon for Continuous Integration servers as correctness
+  # is usually a priority over speed in CI environments. Using a fresh
+  # runtime for each build is more reliable since the runtime is completely
+  # isolated from any previous builds.
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+  JACOCO_CSV_LOCATION: '$CI_PROJECT_DIR/app/build/jacocoCsv'
+
+  # Project variables
+  APP_NAME: "ssg"
+  MAIN_CLASS_PATH: "ssg.App"
+  DISTRIB_PATH: "build/distributions"
+  PROJECT_URL: "https://gaufre.informatique.univ-paris-diderot.fr/meguenni/ssg/"

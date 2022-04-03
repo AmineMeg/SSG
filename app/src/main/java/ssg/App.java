@@ -11,21 +11,13 @@ import ssg.myapplicationrunner.MyApplicationRunner;
 /**
  * Main class.
  */
+@Generated
 public class App {
 
     /**
      * Logger.
      */
     private static final Logger logger = LogManager.getLogger();
-
-    /**
-     * Return a text.
-     *
-     *@return "Hello World!"
-     */
-    public String getGreeting() {
-        return "Hello World!";
-    }
 
     /**
      * Main.

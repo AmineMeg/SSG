@@ -31,7 +31,8 @@ And uses :
 * Picocli : 4.6.3
 * CommonMark : 0.18.2
 * Mockito : 4.4.0
-* Nu Validator : 20.7.2
+* unirest-java: 3.13.6
+* shadowjar: 7.1.2
 
 ## Setup
 To run this project, you can use gradlew

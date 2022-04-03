@@ -2,16 +2,20 @@
 # This is the Gradle build system for JVM applications
 # https://gradle.org/
 # https://github.com/gradle/gradle
+
+# inclure les variables et les modèles
+include:
+  - local: pipeline-scripts/.gitlab-ci-variables.yml
+  - local: pipeline-scripts/.gitlab-ci-deploy-template.yml
+  - local: pipeline-scripts/.gitlab-ci-release-template.yml
+
+stages:
+  - build
+  - test
+  - deploy
+  - release
+
 image: gradle:alpine
-
-# Disable the Gradle daemon for Continuous Integration servers as correctness
-# is usually a priority over speed in CI environments. Using a fresh
-# runtime for each build is more reliable since the runtime is completely
-# isolated from any previous builds.
-variables:
-  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
-  JACOCO_CSV_LOCATION: '$CI_PROJECT_DIR/app/build/jacocoCsv'
-
 
 services:
   - docker:dind
@@ -29,8 +33,15 @@ gradle-build:
       - app/build
       - .gradle
 
+  artifacts:
+    paths:
+      - app/build/distributions/ssg.zip
+      - app/build/distributions/ssg-compressed.zip
+
 unit-test:
   stage: test
+  except:
+    - tags
   script: gradle test
   cache:
     key: "$CI_COMMIT_REF_NAME"
@@ -40,8 +51,11 @@ unit-test:
       - .gradle
 
 
+
 checkstyle-test:
   stage: test
+  except:
+    - tags
   script:
     - gradle checkstyleMain
     - gradle checkstyleTest
@@ -55,6 +69,8 @@ checkstyle-test:
 
 PMD-test:
   stage: test
+  except:
+    - tags
   script:
     - gradle pmdMain
     - gradle pmdTest
@@ -65,8 +81,11 @@ PMD-test:
       - app/build
       - .gradle
 
+
 spotbugs-test:
   stage: test
+  except:
+    - tags
   script:
     - gradle spotbugsMain
     - gradle spotbugsTest
@@ -77,8 +96,11 @@ spotbugs-test:
       - app/build
       - .gradle
 
+
 total-check:
   stage: test
+  except:
+    - tags
   script:
     - gradle check
     - awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print covered, "/", instructions, " instructions covered"; print 100*covered/instructions, "% covered" }' $JACOCO_CSV_LOCATION
@@ -89,20 +111,21 @@ total-check:
       - app/build
       - .gradle
 
-release:
+deploy:
   stage: deploy
   image: alpine:latest
   when: manual
-
-  except:
-    - tags
+  extends: .gitlab-ci-deploy-template
 
   only:
     - master
 
-  script:
+  except:
+    - tags
+
+  before_script:
     - apk --no-cache add curl
-    - sh deploy.sh
+
 
   cache:
     key: "$CI_COMMIT_REF_NAME"
@@ -111,3 +134,20 @@ release:
       - app/build
       - .gradle
 
+release:
+  stage: release
+  image: alpine:latest
+  when: manual
+  extends: .gitlab-ci-release-template
+
+  only:
+    - tags
+
+  before_script:
+    - apk --no-cache add curl
+    - export ARTIFACTS_URL="$PROJECT_URL-/jobs/$CI_JOB_ID/artifacts/download?job=release"
+
+  artifacts:
+    paths:
+      - app/build/distributions/ssg.zip
+      - app/build/distributions/ssg-compressed.zip

@@ -1,6 +1,6 @@
 if [ "$#" -eq 0 ]
 then
-java -jar app/build/libs/app-all.jar
+java -jar app/build/libs/ssg-all.jar
 else
-java -jar app/build/libs/app-all.jar "$@"
+java -jar app/build/libs/ssg-all.jar "$@"
 fi
