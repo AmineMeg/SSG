@@ -9,12 +9,17 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ssg.buildpage.BuildPage;
 import ssg.exceptions.NotConvertibleException;
+import ssg.filereader.FileReader;
+import ssg.parsertoml.ParserToml;
 import ssg.staticfilehandler.InterfaceStaticFileHandler;
+import ssg.tomlvaluetypewrapper.TomlValueTypeWrapper;
 
 /**
  * Website builder.
@@ -59,13 +64,22 @@ public class BuildSiteImplementation implements BuildSite {
      */
     public static final String RAW_STATIC = "static";
 
-    //private final HashMap<K,V> config;
+    /**
+     * configuration of the website being built.
+     */
+    private Map<String, TomlValueTypeWrapper> config;
 
     /**
      * BuildPage dependency.
      */
     @Inject @Named("BuildPage")
     private BuildPage buildPage;
+
+    /**
+     * FileReader dependency.
+     */
+    @Inject @Named("FileReader")
+    private FileReader fileReader;
 
     /**
      * StaticFileHandlerApache dependency.
@@ -76,8 +90,8 @@ public class BuildSiteImplementation implements BuildSite {
     /**
      * ParserToml dependency.
      */
-    /*@Inject @Named("ParserToml")
-    private ParserToml parserToml;*/
+    @Inject @Named("ParserToml")
+    private ParserToml parserToml;
 
     /**
      * Create the entire website from a directory.
@@ -116,9 +130,12 @@ public class BuildSiteImplementation implements BuildSite {
                                 ": apply the function handle from staticFileHandler {}",
                         item.getName());
                 staticFileHandler.handle(item.getPath() + "/", dstDirectory);
-            } /*else if (SITE_TOML.equals(item.getPath())){
-
-            }*/
+            } else if (SITE_TOML.equals(item.getName())) {
+                logger.info("createWebSite() : reading config file {}", item.getPath());
+                String bufferConfig =  fileReader.read(item.getPath());
+                logger.info("createWebSite() : parsing config file {}", item.getPath());
+                this.config = parserToml.parse(bufferConfig);
+            }
         }
         logger.info("createWebSite() : create website successfully");
     }

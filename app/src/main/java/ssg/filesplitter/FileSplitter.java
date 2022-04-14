@@ -3,6 +3,7 @@ package ssg.filesplitter;
 import java.util.Optional;
 import ssg.exceptions.MetadataException;
 import ssg.exceptions.NullArgumentException;
+import ssg.pair.Pair;
 
 /**
  * FileSplitter Interface.

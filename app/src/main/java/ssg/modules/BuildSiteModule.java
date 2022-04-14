@@ -17,6 +17,8 @@ import ssg.htmlvalidator.HtmlValidator;
 import ssg.htmlvalidator.HtmlValidatorW3Capi;
 import ssg.markdowntohtmlconverter.MarkdownToHtmlConverter;
 import ssg.markdowntohtmlconverter.MarkdownToHtmlConverterImplementation;
+import ssg.parsertoml.ParserToml;
+import ssg.parsertoml.ParserTomlImplementation;
 import ssg.staticfilehandler.InterfaceStaticFileHandler;
 import ssg.staticfilehandler.StaticFileHandlerApache;
 
@@ -38,5 +40,11 @@ public class BuildSiteModule extends AbstractModule {
         bind(InterfaceStaticFileHandler.class)
                 .annotatedWith(Names.named("StaticFileHandler"))
                 .to(StaticFileHandlerApache.class);
+        bind(ParserToml.class)
+                .annotatedWith(Names.named("ParserToml"))
+                .to(ParserTomlImplementation.class);
+        bind(FileReader.class)
+                .annotatedWith(Names.named("FileReader"))
+                .to(FileReaderImplementation.class);
     }
 }

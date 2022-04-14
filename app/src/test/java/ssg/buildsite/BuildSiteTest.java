@@ -27,13 +27,18 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import ssg.buildpage.BuildPage;
 import ssg.exceptions.NotConvertibleException;
+import ssg.filereader.FileReader;
+import ssg.filereader.FileReaderImplementation;
+import ssg.parsertoml.ParserToml;
+import ssg.parsertoml.ParserTomlImplementation;
 import ssg.staticfilehandler.InterfaceStaticFileHandler;
 
 
 /**
  * JUnit test class for BuildSite.
  */
-@SuppressWarnings({"PMD.LawOfDemeter", "PMD.AvoidCatchingGenericException"})
+@SuppressWarnings({"PMD.LawOfDemeter", "PMD.AvoidCatchingGenericException",
+    "PMD.TooManyMethods", "PMD.ExcessiveImports"})
 class BuildSiteTest {
 
     /**
@@ -66,6 +71,12 @@ class BuildSiteTest {
             bind(InterfaceStaticFileHandler.class)
                     .annotatedWith(Names.named("StaticFileHandler"))
                     .toInstance(staticFileHandler);
+            bind(ParserToml.class)
+                    .annotatedWith(Names.named("ParserToml"))
+                    .to(ParserTomlImplementation.class);
+            bind(FileReader.class)
+                    .annotatedWith(Names.named("FileReader"))
+                    .to(FileReaderImplementation.class);
         }
     });
 

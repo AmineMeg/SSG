@@ -1,8 +1,8 @@
 package ssg.page;
 
+import java.util.Map;
 import java.util.Optional;
-import ssg.tomlvaluetypewrapper.TomlTableWrapper;
-
+import ssg.tomlvaluetypewrapper.TomlValueTypeWrapper;
 
 
 /**
@@ -19,30 +19,24 @@ public class PageDraft {
     /**
      * A Table with the metadata required to build the page but not mandatory.
      */
-    private TomlTableWrapper metadata;
+    private final Optional<Map<String, TomlValueTypeWrapper>> metadata;
 
     /**
      * Constructor.
      *
-     * @param buffer containing the HTML code.
+     * @param metadata will contain the metadata.
+     * @param buffer containing the string content of .md to parse.
      */
-    public PageDraft(String buffer) {
-        this.buffer = buffer;
-    }
-
-    /**
-     * Constructor.
-     */
-    public PageDraft(TomlTableWrapper metadata, String buffer) {
-        this.metadata = metadata;
+    public PageDraft(Map<String, TomlValueTypeWrapper> metadata, String buffer) {
+        this.metadata = Optional.ofNullable(metadata);
         this.buffer = buffer;
     }
 
     /**
      * Return metadata if exists.
      */
-    public Optional<TomlTableWrapper> getMetadata() {
-        return Optional.ofNullable(metadata);
+    public Optional<Map<String, TomlValueTypeWrapper>> getMetadata() {
+        return metadata;
     }
 
     /**

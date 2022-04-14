@@ -13,37 +13,19 @@ import ssg.tomlvaluetypewrapper.TomlIntegerWrapper;
 import ssg.tomlvaluetypewrapper.TomlTableWrapper;
 import ssg.tomlvaluetypewrapper.TomlValueTypeWrapper;
 
-
-
 /**
- * App class test.
+ * Junit test class for TomlTableWrapper.
  */
-
 @SuppressWarnings("PMD.TooManyMethods")
 class PageDraftTest {
-
-    @Test void createEmptyPageDraft() {
-        PageDraft c = new PageDraft("");
-        assertEquals("",c.getBuffer(),"Test page vide");
-    }
 
     @SuppressWarnings("PMD.LawOfDemeter")
     @Test void createPageDraft() {
         HashMap<String, TomlValueTypeWrapper> a = new HashMap<>();
         a.put("un", new TomlIntegerWrapper(1));
         a.put("deux", new TomlIntegerWrapper(2));
-        TomlTableWrapper b = new TomlTableWrapper(a);
-        PageDraft e = new PageDraft(b, "");
-        String expected = "Optional[<table>\n"
-                + "\t<tr>\n"
-                + "\t\t<td>un</td>\n"
-                + "\t\t<td>1</td>\n"
-                + "\t</tr>\n"
-                + "\t<tr>\n"
-                + "\t\t<td>deux</td>\n"
-                + "\t\t<td>2</td>\n"
-                + "\t</tr>\n"
-                + "</table>\n]";
+        PageDraft e = new PageDraft(a, "");
+        String expected = "Optional[{un=1, deux=2}]";
         assertEquals(expected,e.getMetadata().toString(),"Test page avec Metadata");
     }
 
