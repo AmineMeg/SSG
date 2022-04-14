@@ -5,22 +5,27 @@ import com.google.inject.name.Named;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.File;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ssg.exceptions.NotMarkdownException;
 import ssg.filereader.FileReader;
 import ssg.filesplitter.FileSplitter;
-import ssg.filesplitter.Pair;
 import ssg.filewriter.FileWriter;
 import ssg.htmlvalidator.HtmlValidator;
 import ssg.markdowntohtmlconverter.MarkdownToHtmlConverter;
+import ssg.page.PageDraft;
+import ssg.pair.Pair;
+import ssg.parsertoml.ParserToml;
+import ssg.tomlvaluetypewrapper.TomlValueTypeWrapper;
 
 /**
  * Build an HTML page file from a Markdown file.
  */
 @SuppressWarnings({"PMD.LawOfDemeter", "PMD.AvoidCatchingGenericException",
-    "PMD.GuardLogStatement", "PMD.SignatureDeclareThrowsException"})
+    "PMD.GuardLogStatement", "PMD.SignatureDeclareThrowsException",
+    "PMD.CyclomaticComplexity"})
 @SuppressFBWarnings
 public class BuildPageImplementation implements BuildPage {
 
@@ -44,8 +49,8 @@ public class BuildPageImplementation implements BuildPage {
     /**
      * ParserTOML dependency.
      */
-    /* TODO: @Inject @Named("ParserTOML")
-    private ParserTOML parserTOML;*/
+    @Inject @Named("ParserToml")
+    private ParserToml parserToml;
 
     /**
      * MarkdownToHtmlConverter dependency.
@@ -89,22 +94,77 @@ public class BuildPageImplementation implements BuildPage {
             logger.info("run(): Attempt to convert a markdown file {} to an HTML file {} ",
                     sourceFilePath, outputDirectory);
             String sourceRawContent = this.fileReader.read(sourceFilePath);
+
+            logger.info("run(): Attempt to parse split metadata from content for file {}  ",
+                    sourceFilePath);
             Pair<String, Optional<String>> sourceSplittedContent =
                     this.fileSplitter.split(sourceRawContent);
-            String markdownToHtmlConverted = this.markdownToHtmlConverter
-                    .convert(sourceSplittedContent.getFirstValue());
-            File fileWrite = new File(sourceFilePath);
-            String fileOutputName =  Path.of(fileWrite.getName())
-                    .toString()
-                    .replace(".md", ".html");
-            this.fileWriter.write(outputDirectory
-                    +
-                    fileOutputName, markdownToHtmlConverted);
-            this.htmlValidator.validateHtml(outputDirectory + fileOutputName);
-            logger.info("run(): Conversion is done ");
+
+
+            logger.info("run(): Attempt to parse metadata for  file {}  ",
+                    sourceFilePath);
+
+            Map<String, TomlValueTypeWrapper> metadata = null;
+
+            //  IF METADATA ARE PRESENT THEN WE ARE PARSING THEM
+            if (sourceSplittedContent.getSecondValue().isPresent()) {
+                logger.info("run(): Parsing metadata for file {}  ",
+                        sourceFilePath);
+                metadata = parserToml.parse(sourceSplittedContent.getSecondValue().get());
+            }
+
+            //IF THE DOCUMENT IS NOT A DRAFT THEN WE COMPUTE IT
+            if ((metadata != null
+                    && metadata.containsKey("draft")
+                    && metadata.get("draft").toString().equals("false"))
+                    || metadata == null
+                    || !metadata.containsKey("draft")) {
+
+                compute(sourceFilePath, outputDirectory, sourceSplittedContent, metadata);
+
+            } else {
+
+                logger.info("run(): According to metadata {} is a draft and will not be converted ",
+                        sourceFilePath);
+            }
+
         } catch (Exception e) {
             logger.error("run(): There was an issue during the conversion ", e);
             throw e;
         }
     }
+
+    private void compute(String sourceFilePath, String outputDirectory,
+                        Pair<String, Optional<String>> sourceSplittedContent,
+                        Map<String, TomlValueTypeWrapper> metadata) throws Exception {
+
+        logger.info("run(): Creating PageDraft Instance for  file {}  ",
+                sourceFilePath);
+        PageDraft pageDraft = new PageDraft(metadata,
+                sourceSplittedContent.getFirstValue());
+
+        logger.info("run(): converting file {}  ",
+                sourceFilePath);
+        String markdownToHtmlConverted = this.markdownToHtmlConverter
+                .convert(sourceSplittedContent.getFirstValue());
+
+        logger.info("run(): writing converted  file {}  ",
+                sourceFilePath);
+        File fileWrite = new File(sourceFilePath);
+        String fileOutputName =  Path.of(fileWrite.getName())
+                .toString()
+                .replace(".md", ".html");
+
+        this.fileWriter.write(outputDirectory
+                +
+                fileOutputName, markdownToHtmlConverted);
+
+        logger.info("run(): validating html for file {}  ",
+                sourceFilePath);
+
+        this.htmlValidator.validateHtml(outputDirectory + fileOutputName);
+        logger.info("run(): Conversion is done ");
+    }
+
+
 }

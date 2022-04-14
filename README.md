@@ -16,12 +16,12 @@ This tools aims to create HTML page from your content source written in Markdown
 
 ## Technologies
 Project is created with:
-* Java : 17.0.1
-* Gradle : 7.4
+* Java : 18
+* Gradle : 7.4.2
 
 And uses :
 * JUnit : 5.8.1
-* JaCoCo : 0.8.7
+* JaCoCo : 0.8.8
 * Checkstyle : 10.0 with a customized configuration file inspired by Google's [checkstyle.xml](https://github.com/checkstyle/checkstyle/blob/master/src/main/resources/google_checks.xml). You can check here the complete rules that they use : https://google.github.io/styleguide/javaguide.html#s3.4.1-one-top-level-class
 * PMD : 6.42.0
 * Spotbugs : 5.0.6

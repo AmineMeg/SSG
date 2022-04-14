@@ -15,6 +15,8 @@ import ssg.htmlvalidator.HtmlValidator;
 import ssg.htmlvalidator.HtmlValidatorW3Capi;
 import ssg.markdowntohtmlconverter.MarkdownToHtmlConverter;
 import ssg.markdowntohtmlconverter.MarkdownToHtmlConverterImplementation;
+import ssg.parsertoml.ParserToml;
+import ssg.parsertoml.ParserTomlImplementation;
 
 /**
  * Module class for BuildPage.
@@ -35,9 +37,9 @@ public class BuildPageModule extends AbstractModule {
         bind(FileSplitter.class)
                 .annotatedWith(Names.named("FileSplitter"))
                 .to(FileSplitterImplementation.class);
-        // TODO: bind(ParserTOML.class)
-        //  .annotatedWith(Names.named("ParserTOML"))
-        //  .to(FileReaderImplementation.class);
+        bind(ParserToml.class)
+             .annotatedWith(Names.named("ParserToml"))
+             .to(ParserTomlImplementation.class);
         bind(MarkdownToHtmlConverter.class)
                 .annotatedWith(Names.named("MarkdownToHtmlConverter"))
                 .to(MarkdownToHtmlConverterImplementation.class);

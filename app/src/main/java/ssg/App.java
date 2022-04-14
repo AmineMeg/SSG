@@ -12,12 +12,17 @@ import ssg.myapplicationrunner.MyApplicationRunner;
  * Main class.
  */
 @Generated
-public class App {
+public final  class App {
 
     /**
      * Logger.
      */
     private static final Logger logger = LogManager.getLogger();
+
+    /**
+     * Private constructor to make app an utility class.
+     */
+    private App() {}
 
     /**
      * Main.

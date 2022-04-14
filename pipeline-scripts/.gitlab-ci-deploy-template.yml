@@ -2,9 +2,9 @@
   script:
     - |
       curl --header "PRIVATE-TOKEN: 3AZgFN33XZQpQahwmzo4" \
-           --data name="SSG v1.1.0" \
+           --data name="SSG v1.2.0" \
            --data url=$ARTIFACTS_URL \
-           --data tag_name="v1.1.0" \
-           --data description="BuildSite: Permet de construire un site web entier à partir d'un répertoire" \
+           --data tag_name="v1.2.0" \
+           --data description="Prise en charge des métadonnées lors de la génération des pages HTML" \
            --data ref="master" \
            --request POST https://gaufre.informatique.univ-paris-diderot.fr/api/v4/projects/${CI_PROJECT_ID}/releases/

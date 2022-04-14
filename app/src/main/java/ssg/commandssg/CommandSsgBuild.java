@@ -20,7 +20,7 @@ import ssg.modules.BuildSiteModule;
  */
 @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.ImmutableField",
     "PMD.AvoidCatchingGenericException", "PMD.LawOfDemeter"})
-@CommandLine.Command(name = "build")
+@CommandLine.Command(name = "build", mixinStandardHelpOptions = true)
 public class CommandSsgBuild implements Runnable {
 
     /**

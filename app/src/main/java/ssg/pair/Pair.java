@@ -1,4 +1,4 @@
-package ssg.filesplitter;
+package ssg.pair;
 
 import ssg.exceptions.NullArgumentException;
 

@@ -1,0 +1,95 @@
+# Most of examples come from https://toml.io/en/v1.0.0-rc.3
+
+# String
+str1 = "The quick brown fox jumps over the lazy dog."
+str2 = """
+The quick brown \
+
+
+  fox jumps over \
+    the lazy dog."""
+str3 = """\
+       The quick brown \
+       fox jumps over \
+       the lazy dog.\
+       """
+str4 = """Here are two quotation marks: "". Simple enough."""
+str5 = """Here are three quotation marks: ""\"."""
+str6 = """Here are fifteen quotation marks: ""\"""\"""\"""\"""\"."""
+str7 = """"This," she said, "is just a pointless statement.""""
+
+# Integer
+int1 = +99
+int2 = 42
+int3 = 0
+int4 = -17
+int5 = 1_000
+int6 = 5_349_221
+
+# Float
+flt1 = +1.0
+flt2 = 3.1415
+flt3 = -0.01
+flt4 = 5e+22
+flt5 = 1e06
+flt6 = -2E-2
+flt7 = 6.626e-34
+
+ # Boolean
+bool1 = true
+bool2 = false
+
+# Offset date time
+odt1 = 1979-05-27T07:32:00Z
+odt2 = 1979-05-27T00:32:00-07:00
+odt3 = 1979-05-27T00:32:00.999999-07:00
+
+# Local date time
+ldt1 = 1979-05-27T07:32:00
+ldt2 = 1979-05-27T00:32:00.999999
+
+# Local date
+ld1 = 1979-05-27
+
+# Local time
+lt1 = 07:32:00
+lt2 = 00:32:00.999999
+
+# Array
+integers = [ 1, 2, 3 ]
+colors = [ "red", "yellow", "green" ]
+nested_array_of_int = [ [ 1, 2 ], [3, 4, 5] ]
+nested_mixed_array = [ [ 1, 2 ], ["a", "b", "c"] ]
+string_array = [ "all", 'strings', """are the same""", '''type''' ]
+numbers = [ 0.1, 0.2, 0.5, 1, 2, 5 ]
+contributors = ["Foo Bar <foo@example.com>",
+{ name = "Baz Qux", email = "bazqux@example.com", url = "https://example.com/bazqux" }]
+integers2 = [
+  1, 2, 3
+]
+integers3 = [
+  1,
+  2, 
+]
+
+# Table
+[table-1]
+key1 = "some string"
+key2 = 123
+
+[fruit]
+apple.color = "red"
+apple.taste.sweet = true
+
+# Array of tables
+[[products]]
+name = "Hammer"
+sku = 738594937
+
+[[products]]
+
+[[products]]
+name = "Nail"
+sku = 284758393
+
+color = "gray"

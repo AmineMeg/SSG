@@ -1,3 +1,6 @@
++++
+draft = true
++++
 # Common Mark
 
 Common Mark is the basic markup format adopted for the project.

@@ -1,17 +1,23 @@
 package ssg.filesplitter;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import ssg.exceptions.MetadataException;
 import ssg.exceptions.NullArgumentException;
+import ssg.pair.Pair;
+
+
+
 
 /**
  * FileSplitterImplementation class test.
  */
+@SuppressWarnings({"PMD.LawOfDemeter", "PMD.JUnitTestContainsTooManyAsserts"})
+
 class FileSplitterImplementationTest {
 
     @Test
@@ -40,10 +46,12 @@ class FileSplitterImplementationTest {
                 + newline;
 
         try {
-            Pair<String, Optional<String>> expected =
-                    new Pair<>(expectedContent, Optional.of(expectedMetadata));
-            assertTrue(expected.isEqual(fileSplitter.split(buffer)),
+            Pair<String, Optional<String>> output = fileSplitter.split(buffer);
+            assertEquals(expectedContent, output.getFirstValue(),
+                    "split: The content should be present and correctly encapsulated");
+            assertEquals(expectedMetadata, output.getSecondValue().get(),
                     "split: The metadata should be present and correctly encapsulated");
+
 
         } catch (MetadataException e) {
             fail("split: syntax error for the metadata: " + e.getMessage());
@@ -91,9 +99,11 @@ class FileSplitterImplementationTest {
                 + newline;
 
         try {
-            Pair<String, Optional<String>> expected =
-                    new Pair<>(expectedContent, Optional.of(expectedMetadata));
-            assertTrue(expected.isEqual(fileSplitter.split(buffer)),
+
+            Pair<String,Optional<String>> output = fileSplitter.split(buffer);
+            assertEquals(expectedContent, output.getFirstValue(),
+                    "split: The content should be present and correctly encapsulated");
+            assertEquals(expectedMetadata, output.getSecondValue().get(),
                     "split: The metadata should be present and correctly encapsulated");
 
         } catch (MetadataException e) {
@@ -139,9 +149,10 @@ class FileSplitterImplementationTest {
                 + newline;
 
         try {
-            Pair<String, Optional<String>> expected =
-                    new Pair<>(expectedContent, Optional.of(expectedMetadata));
-            assertTrue(expected.isEqual(fileSplitter.split(buffer)),
+            Pair<String,Optional<String>> output = fileSplitter.split(buffer);
+            assertEquals(expectedContent, output.getFirstValue(),
+                    "split: The content should be present and correctly encapsulated");
+            assertEquals(expectedMetadata, output.getSecondValue().get(),
                     "split: The metadata should be present and correctly encapsulated");
 
         } catch (MetadataException e) {
@@ -164,10 +175,12 @@ class FileSplitterImplementationTest {
                 + "Lorem *ipsum* dolor sit amet.";
 
         try {
-            Pair<String, Optional<String>> expected =
-                    new Pair<>(expectedContent, Optional.empty());
-            assertTrue(expected.isEqual(fileSplitter.split(buffer)),
+            Pair<String,Optional<String>> output = fileSplitter.split(buffer);
+            assertEquals(expectedContent, output.getFirstValue(),
+                    "split: The content should be present and correctly encapsulated");
+            assertEquals(false, output.getSecondValue().isPresent(),
                     "split: metadonnées doit être absentes");
+
         } catch (MetadataException e) {
             fail("split: syntax error: " + e.getMessage());
         } catch (NullArgumentException e) {
@@ -181,8 +194,12 @@ class FileSplitterImplementationTest {
         FileSplitterImplementation fileSplitter = new FileSplitterImplementation();
 
         try {
-            Pair<String, Optional<String>> expected = new Pair<>("", Optional.empty());
-            assertTrue(expected.isEqual(fileSplitter.split("")), "split: fichier doit être vide");
+
+            Pair<String,Optional<String>> output = fileSplitter.split("");
+            assertEquals("", output.getFirstValue(),
+                    "split: File should be empty");
+            assertEquals(false, output.getSecondValue().isPresent(),
+                    "split: File should be empty");
         } catch (MetadataException e) {
             fail("split: syntaxe incorrecte: " + e.getMessage());
 

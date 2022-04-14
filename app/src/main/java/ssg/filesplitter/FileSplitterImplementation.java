@@ -7,6 +7,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ssg.exceptions.MetadataException;
 import ssg.exceptions.NullArgumentException;
+import ssg.pair.Pair;
+
 
 /**
  * FileSplitterImplementation class.
@@ -70,7 +72,7 @@ public class FileSplitterImplementation implements FileSplitter {
                 }
             }
             // buffer is clean and can be returned
-            return new Pair<>(buffer, Optional.empty());
+            return new Pair<>(buffer,Optional.empty());
 
         } catch (MetadataException e) {
             String message = e.getMessage();
@@ -123,7 +125,7 @@ public class FileSplitterImplementation implements FileSplitter {
             content.append(lines[j]).append(System.getProperty("line.separator"));
         }
 
-        return new Pair<>(content.toString(), Optional.of(metadata.toString()));
+        return new Pair<>(content.toString(),Optional.of(metadata.toString()));
     }
 
     /**
