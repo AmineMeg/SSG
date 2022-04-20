@@ -9,7 +9,8 @@ import picocli.CommandLine;
  * CommandSsg class.
  */
 @CommandLine.Command(name = "ssg", description = "ssg main command",
-        mixinStandardHelpOptions = true, subcommands = {CommandSsgBuild.class})
+        mixinStandardHelpOptions = true,
+        subcommands = {CommandSsgBuild.class, CommandSsgServe.class})
 public class CommandSsg implements Runnable {
 
     /**

@@ -12,7 +12,7 @@ import ssg.myapplicationrunner.MyApplicationRunner;
  * Main class.
  */
 @Generated
-public final  class App {
+public final class App {
 
     /**
      * Logger.
@@ -34,7 +34,5 @@ public final  class App {
         logger.info("Launch app");
         MyApplicationRunner applicationRunner = new MyApplicationRunner(args);
         applicationRunner.run();
-        System.exit(applicationRunner.getExitCode());
-
     }
 }

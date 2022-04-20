@@ -2,14 +2,15 @@ package ssg.buildsite;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static ssg.buildsite.BuildSiteImplementation.CONTENTS;
-import static ssg.buildsite.BuildSiteImplementation.INDEX_MD;
-import static ssg.buildsite.BuildSiteImplementation.SITE_TOML;
-import static ssg.buildsite.BuildSiteImplementation.STATIC;
+import static ssg.config.SiteStructureVariable.CONTENTS;
+import static ssg.config.SiteStructureVariable.INDEX_MD;
+import static ssg.config.SiteStructureVariable.SITE_TOML;
+import static ssg.config.SiteStructureVariable.STATIC;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -236,7 +237,8 @@ class BuildSiteTest {
                             + CONTENTS
                             + INDEX_MD,
                     dstDirectory + CONTENTS);
-            verify(staticFileHandler, times(0)).handle(srcDirectory + STATIC, dstDirectory);
+            verify(buildPage, times(1)).run(anyString(), anyString());
+            verify(staticFileHandler, times(0)).handle(anyString(), anyString());
 
             cleanTestDirectory();
         } catch (Exception e) {
@@ -250,7 +252,6 @@ class BuildSiteTest {
      */
     @Test
     void testCreateWebSiteWithArbo() {
-
         try {
             //GIVEN
             initDirectory();
@@ -280,6 +281,8 @@ class BuildSiteTest {
                     .run(srcDirectory + CONTENTS + subDirectory + srcFileNameBis,
                             dstDirectory + CONTENTS + subDirectory);
             verify(staticFileHandler, times(1)).handle(srcDirectory + STATIC, dstDirectory);
+            verify(buildPage, times(1)).run(anyString(), anyString());
+            verify(buildPage, times(1)).run(anyString(), anyString());
 
             cleanTestDirectory();
         } catch (Exception e) {
@@ -307,6 +310,8 @@ class BuildSiteTest {
                             + INDEX_MD,
                     dstDirectory + CONTENTS);
             verify(staticFileHandler, times(1)).handle(srcDirectory + STATIC, dstDirectory);
+            verify(buildPage, times(1)).run(anyString(), anyString());
+            verify(staticFileHandler, times(1)).handle(anyString(), anyString());
 
             cleanTestDirectory();
         } catch (Exception e) {
