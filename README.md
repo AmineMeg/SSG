@@ -33,13 +33,14 @@ And uses :
 * Mockito : 4.4.0
 * unirest-java: 3.13.6
 * shadowjar: 7.1.2
+* tomlj: 1.0.0
+* jackson: 2.13.2
 
 ## Setup
-To run this project, you can use gradlew
+To build this project, you can use gradlew
 
 ```bash
 $ ./gradlew build
-$ ./gradlew run 
 ```
 
 ## Other commands

@@ -1,6 +1,6 @@
 package ssg.staticfilehandler;
 
-import static ssg.buildsite.BuildSiteImplementation.STATIC;
+import static ssg.config.SiteStructureVariable.STATIC;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.File;

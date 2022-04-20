@@ -12,38 +12,51 @@ import ssg.tomlvaluetypewrapper.TomlValueTypeWrapper;
 public class PageDraft {
 
     /**
-     * The buffer containing the HTML code.
+     * Page title.
      */
-    private final String buffer;
+    private final String title;
 
     /**
-     * A Table with the metadata required to build the page but not mandatory.
+     * Page content.
      */
-    private final Optional<Map<String, TomlValueTypeWrapper>> metadata;
+    private final String content;
+
+    /**
+     * Optional page datas.
+     */
+    private final Optional<Map<String, TomlValueTypeWrapper>> data;
 
     /**
      * Constructor.
      *
-     * @param metadata will contain the metadata.
-     * @param buffer containing the string content of .md to parse.
+     * @param data page data
+     * @param content page content 
+     * @param title page title
      */
-    public PageDraft(Map<String, TomlValueTypeWrapper> metadata, String buffer) {
-        this.metadata = Optional.ofNullable(metadata);
-        this.buffer = buffer;
+    public PageDraft(Map<String, TomlValueTypeWrapper> data, String content, String title) {
+        this.data = Optional.ofNullable(data);
+        this.content = content;
+        this.title = title;
     }
 
     /**
-     * Return metadata if exists.
+     * Return page datas.
      */
-    public Optional<Map<String, TomlValueTypeWrapper>> getMetadata() {
-        return metadata;
+    public Optional<Map<String, TomlValueTypeWrapper>> getData() {
+        return data;
     }
 
     /**
-     * Return the buffer of a Page.
+     * Return page title.
      */
-    public String getBuffer() {
-        return buffer;
+    public String getTitle() {
+        return title;
     }
 
+    /**
+     * Return page content.
+     */
+    public String getContent() {
+        return content;
+    }
 }

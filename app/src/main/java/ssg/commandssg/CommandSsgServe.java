@@ -10,15 +10,17 @@ import org.apache.logging.log4j.Logger;
 import picocli.CommandLine;
 import ssg.buildpage.BuildPage;
 import ssg.buildsite.BuildSite;
+import ssg.exceptions.HttpConfigurationException;
+import ssg.httpserver.MyHttpServer;
 import ssg.ioc.Container;
 
 /**
- * CommandSsgBuild class.
+ * CommandSsgServe class.
  */
 @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.ImmutableField",
     "PMD.AvoidCatchingGenericException", "PMD.LawOfDemeter", "PMD.GuardLogStatement"})
-@CommandLine.Command(name = "build", mixinStandardHelpOptions = true)
-public class CommandSsgBuild implements Runnable {
+@CommandLine.Command(name = "serve", mixinStandardHelpOptions = true)
+public class CommandSsgServe implements Runnable {
 
     /**
      * Logger.
@@ -38,6 +40,13 @@ public class CommandSsgBuild implements Runnable {
     @CommandLine.Option(names = {"--input-dir"},
             description = "input directory, default is ./")
     private String inputDir = "./";
+
+    /**
+     * Input Directory.
+     */
+    @CommandLine.Option(names = {"--port"},
+            description = "input port, default is 8080")
+    private String port = "8080";
 
 
     /**
@@ -73,7 +82,7 @@ public class CommandSsgBuild implements Runnable {
     @SuppressWarnings("PMD.GuardLogStatement")
     public void run() {
 
-        logger.info("CommandSsgBuild : ssg build subcommand called");
+        logger.info("CommandSsgServe : ssg serve subcommand called");
 
         //CREATING OUTPUTDIR IF IT DOES NOT EXISTS
         createOutputDir();
@@ -89,6 +98,16 @@ public class CommandSsgBuild implements Runnable {
         } else {
             BuildSite buildSiteInstance = Container.container.getInstance(BuildSite.class);
             runningBuildSiteOnDirectory(buildSiteInstance);
+        }
+        launchServer();
+    }
+
+    private void launchServer() {
+        MyHttpServer myHttpServer = new MyHttpServer();
+        try {
+            myHttpServer.startServer(port);
+        } catch (HttpConfigurationException | IOException e) {
+            logger.error("There was a problem with command serve", e);
         }
     }
 
@@ -108,7 +127,7 @@ public class CommandSsgBuild implements Runnable {
             buildSiteInstance.createWebSite(inputDir, outputDir);
             logger.info(inputDir + " translated in " + outputDir);
         } catch (Exception e) {
-            logger.error("There was a problem with command build", e);
+            logger.error("There was a problem with command serve", e);
         }
     }
 
@@ -117,7 +136,7 @@ public class CommandSsgBuild implements Runnable {
             buildPageInstance.run(file, outputDir);
             logger.info(file + " translated in " + outputDir);
         } catch (Exception e) {
-            logger.error("There was a problem for the command build", e);
+            logger.error("There was a problem for the command serve", e);
         }
     }
 }

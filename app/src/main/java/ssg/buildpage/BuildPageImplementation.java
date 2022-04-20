@@ -91,80 +91,76 @@ public class BuildPageImplementation implements BuildPage {
             throw new NotMarkdownException("Trying to convert a file that is not a markdown");
         }
         try {
-            logger.info("run(): Attempt to convert a markdown file {} to an HTML file {} ",
-                    sourceFilePath, outputDirectory);
-            String sourceRawContent = this.fileReader.read(sourceFilePath);
-
-            logger.info("run(): Attempt to parse split metadata from content for file {}  ",
-                    sourceFilePath);
-            Pair<String, Optional<String>> sourceSplittedContent =
-                    this.fileSplitter.split(sourceRawContent);
-
-
-            logger.info("run(): Attempt to parse metadata for  file {}  ",
-                    sourceFilePath);
-
-            Map<String, TomlValueTypeWrapper> metadata = null;
-
-            //  IF METADATA ARE PRESENT THEN WE ARE PARSING THEM
-            if (sourceSplittedContent.getSecondValue().isPresent()) {
-                logger.info("run(): Parsing metadata for file {}  ",
-                        sourceFilePath);
-                metadata = parserToml.parse(sourceSplittedContent.getSecondValue().get());
-            }
-
-            //IF THE DOCUMENT IS NOT A DRAFT THEN WE COMPUTE IT
-            if ((metadata != null
-                    && metadata.containsKey("draft")
-                    && metadata.get("draft").toString().equals("false"))
-                    || metadata == null
-                    || !metadata.containsKey("draft")) {
-
-                compute(sourceFilePath, outputDirectory, sourceSplittedContent, metadata);
-
-            } else {
-
-                logger.info("run(): According to metadata {} is a draft and will not be converted ",
-                        sourceFilePath);
-            }
-
+            convert(sourceFilePath, outputDirectory);
         } catch (Exception e) {
             logger.error("run(): There was an issue during the conversion ", e);
             throw e;
         }
     }
 
+    private void convert(String sourceFilePath, String outputDirectory) throws Exception {
+        logger.info("run(): Attempt to convert a markdown file {} to an HTML file {} ",
+                sourceFilePath, outputDirectory);
+        String sourceRawContent = this.fileReader.read(sourceFilePath);
+
+        logger.info("run(): Attempt to parse split metadata from content for file {}  ",
+                sourceFilePath);
+        Pair<String, Optional<String>> sourceSplittedContent =
+                this.fileSplitter.split(sourceRawContent);
+
+
+        logger.info("run(): Attempt to parse metadata for  file {}  ",
+                sourceFilePath);
+
+        Map<String, TomlValueTypeWrapper> metadata = null;
+
+        //  IF METADATA ARE PRESENT THEN WE ARE PARSING THEM
+        if (sourceSplittedContent.getSecondValue().isPresent()) {
+            logger.info("run(): Parsing metadata for file {}  ",
+                    sourceFilePath);
+            metadata = parserToml.parse(sourceSplittedContent.getSecondValue().get());
+        }
+
+        //IF THE DOCUMENT IS NOT A DRAFT THEN WE COMPUTE IT
+        if (isDraft(metadata)) {
+
+            compute(sourceFilePath, outputDirectory, sourceSplittedContent, metadata);
+
+        } else {
+            logger.info("run(): According to metadata {} is a draft and will not be converted ",
+                    sourceFilePath);
+        }
+    }
+
+    private boolean isDraft(Map<String, TomlValueTypeWrapper> metadata) {
+        return (metadata != null
+                && metadata.containsKey("draft")
+                && metadata.get("draft").toString().equals("false"))
+                || metadata == null
+                || !metadata.containsKey("draft");
+    }
+
     private void compute(String sourceFilePath, String outputDirectory,
                         Pair<String, Optional<String>> sourceSplittedContent,
                         Map<String, TomlValueTypeWrapper> metadata) throws Exception {
 
-        logger.info("run(): Creating PageDraft Instance for  file {}  ",
-                sourceFilePath);
-        PageDraft pageDraft = new PageDraft(metadata,
-                sourceSplittedContent.getFirstValue());
+        String fileName = new File(sourceFilePath).getName();
 
-        logger.info("run(): converting file {}  ",
-                sourceFilePath);
-        String markdownToHtmlConverted = this.markdownToHtmlConverter
+        logger.info("run(): converting file {}  ", sourceFilePath);
+        String htmlContent = this.markdownToHtmlConverter
                 .convert(sourceSplittedContent.getFirstValue());
 
-        logger.info("run(): writing converted  file {}  ",
-                sourceFilePath);
-        File fileWrite = new File(sourceFilePath);
-        String fileOutputName =  Path.of(fileWrite.getName())
-                .toString()
-                .replace(".md", ".html");
+        logger.info("run(): creating PageDraft instance for  file {}  ", sourceFilePath);
+        PageDraft pageDraft = new PageDraft(metadata, htmlContent, fileName.replace(".md", ""));
 
-        this.fileWriter.write(outputDirectory
-                +
-                fileOutputName, markdownToHtmlConverted);
+        logger.info("run(): writing converted  file {}  ", sourceFilePath);
+        String fileOutputName = fileName.replace(".md", ".html");
 
-        logger.info("run(): validating html for file {}  ",
-                sourceFilePath);
+        this.fileWriter.write(outputDirectory + fileOutputName, htmlContent);
 
+        logger.info("run(): validating html for file {}  ", sourceFilePath);
         this.htmlValidator.validateHtml(outputDirectory + fileOutputName);
-        logger.info("run(): Conversion is done ");
+
+        logger.info("run(): conversion is done ");
     }
-
-
 }

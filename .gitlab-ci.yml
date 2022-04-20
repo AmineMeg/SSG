@@ -151,3 +151,16 @@ release:
     paths:
       - app/build/distributions/ssg.zip
       - app/build/distributions/ssg-compressed.zip
+
+generate-javadoc:
+  stage: release
+
+  only:
+    - tags
+
+  script:
+    - gradle javadoc
+
+  artifacts:
+    paths:
+      - app/build/docs/javadoc

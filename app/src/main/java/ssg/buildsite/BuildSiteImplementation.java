@@ -1,5 +1,11 @@
 package ssg.buildsite;
 
+import static ssg.config.SiteStructureVariable.CONTENTS;
+import static ssg.config.SiteStructureVariable.INDEX_MD;
+import static ssg.config.SiteStructureVariable.RAW_CONTENTS;
+import static ssg.config.SiteStructureVariable.RAW_STATIC;
+import static ssg.config.SiteStructureVariable.SITE_TOML;
+
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -9,7 +15,6 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import org.apache.logging.log4j.LogManager;
@@ -33,36 +38,6 @@ public class BuildSiteImplementation implements BuildSite {
      * Log4J Logger.
      */
     public static final Logger logger = LogManager.getLogger(BuildSiteImplementation.class);
-
-    /**
-     * TOML index File.
-     */
-    public static final String SITE_TOML = "site.toml";
-
-    /**
-     * Directory with markdown File.
-     */
-    public static final String CONTENTS = "content/";
-
-    /**
-     * Directory with markdown File.
-     */
-    public static final String RAW_CONTENTS = "content";
-
-    /**
-     * markdown file inside contents/.
-     */
-    public static final String INDEX_MD = "index.md";
-
-    /**
-     * static directory.
-     */
-    public static final String STATIC = "static/";
-
-    /**
-     * static directory.
-     */
-    public static final String RAW_STATIC = "static";
 
     /**
      * configuration of the website being built.

@@ -19,7 +19,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import ssg.exceptions.MetadataException;
@@ -48,7 +47,7 @@ class BuildPageTest {
     /**
      * Class to be tested.
      */
-    private BuildPageImplementation buildPage;
+    private BuildPage buildPage;
 
     /**
      * FileReader dependency.
@@ -226,6 +225,7 @@ class BuildPageTest {
             this.buildPage.run(sourceFileName, targetFileName);
 
             // THEN
+            // Verify arguments
             verify(fileReader, times(1)).read(sourceFileName);
             verify(fileSplitter, times(1)).split(randomMarkdownContent);
             verify(markdownToHtmlConverter, times(1)).convert(pair.getFirstValue());
@@ -234,6 +234,15 @@ class BuildPageTest {
                             .replace(".md", ".html"), htmlContent);
             verify(htmlValidator, times(1))
                     .validateHtml(targetFileName + sourceFileName.replace(".md", ".html"));
+
+            //Verify number of call
+            verify(fileReader, times(1)).read(anyString());
+            verify(fileSplitter, times(1)).split(anyString());
+            verify(markdownToHtmlConverter, times(1)).convert(anyString());
+            verify(fileWriter, times(1))
+                    .write(anyString(), anyString());
+            verify(htmlValidator, times(1))
+                    .validateHtml(anyString());
         } catch (Exception e) {
             fail("An error occur and an exception was raised but it shouldn't be the case"
                     + e.getMessage());
@@ -253,6 +262,7 @@ class BuildPageTest {
             this.buildPage.run(sourceFileName, targetFileName);
 
             // THEN
+            // Verify arguments
             verify(fileReader, times(1)).read(sourceFileName);
             verify(fileSplitter, times(1)).split(randomMarkdownContent);
             verify(markdownToHtmlConverter, times(1)).convert(pair.getFirstValue());
@@ -260,8 +270,16 @@ class BuildPageTest {
                     .write(targetFileName + sourceFileName
                             .replace(".md", ".html"), htmlContent);
             verify(htmlValidator, times(1))
-                    .validateHtml(targetFileName + sourceFileName
-                    .replace(".md", ".html"));
+                    .validateHtml(targetFileName + sourceFileName.replace(".md", ".html"));
+
+            //Verify number of call
+            verify(fileReader, times(1)).read(anyString());
+            verify(fileSplitter, times(1)).split(anyString());
+            verify(markdownToHtmlConverter, times(1)).convert(anyString());
+            verify(fileWriter, times(1))
+                    .write(anyString(), anyString());
+            verify(htmlValidator, times(1))
+                    .validateHtml(anyString());
         } catch (Exception e) {
             fail("An error occur and an exception was raised but it shouldn't be the case"
                     + e.getMessage());
@@ -281,14 +299,13 @@ class BuildPageTest {
 
             // THEN
             verify(fileReader, times(1)).read(sourceFileName);
-            verify(fileSplitter, times(0)).split(randomMarkdownContent);
-            verify(markdownToHtmlConverter, times(0)).convert(pair.getFirstValue());
+            verify(fileReader, times(1)).read(anyString());
+            verify(fileSplitter, times(0)).split(anyString());
+            verify(markdownToHtmlConverter, times(0)).convert(anyString());
             verify(fileWriter, times(0))
-                    .write(targetFileName + sourceFileName
-                            .replace(".md", ".html"), htmlContent);
+                    .write(anyString(), anyString());
             verify(htmlValidator, times(0))
-                    .validateHtml(targetFileName + sourceFileName
-                    .replace(".md", ".html"));
+                    .validateHtml(anyString());
         } catch (Exception e) {
             fail("An error occur and an exception was raised but it shouldn't be the case"
                     + e.getMessage());
@@ -302,27 +319,30 @@ class BuildPageTest {
             when(fileReader.read(sourceFileName)).thenReturn(randomMarkdownContent);
             when(fileSplitter.split(randomMarkdownContent)).thenReturn(pair);
             when(markdownToHtmlConverter.convert(pair.getFirstValue())).thenReturn(htmlContent);
-
-            // WHEN
             doThrow(new IOException())
                     .when(fileWriter)
                     .write(targetFileName + sourceFileName
                             .replace(".md", ".html"), htmlContent);
-
-            // THEN
+            // WHEN
             assertThrows(
                     IOException.class,
                     () -> this.buildPage.run(sourceFileName, targetFileName),
                     "write failed so the function did raise IOException");
+
+            // THEN
             verify(fileReader, times(1)).read(sourceFileName);
             verify(fileSplitter, times(1)).split(randomMarkdownContent);
             verify(markdownToHtmlConverter, times(1)).convert(pair.getFirstValue());
             verify(fileWriter, times(1))
                     .write(targetFileName + sourceFileName
                             .replace(".md", ".html"), htmlContent);
+            verify(fileReader, times(1)).read(anyString());
+            verify(fileSplitter, times(1)).split(anyString());
+            verify(markdownToHtmlConverter, times(1)).convert(anyString());
+            verify(fileWriter, times(1))
+                    .write(anyString(), anyString());
             verify(htmlValidator, times(0))
-                    .validateHtml(targetFileName + sourceFileName
-                            .replace(".md", ".html"));
+                    .validateHtml(anyString());
         } catch (Exception e) {
             fail("An error occur and an exception was raised but it shouldn't be the case"
                     + e.getMessage());
@@ -345,13 +365,13 @@ class BuildPageTest {
             // THEN
             verify(fileReader, times(1)).read(sourceFileName);
             verify(fileSplitter, times(1)).split(randomMarkdownContent);
-            verify(markdownToHtmlConverter, times(0)).convert(pair.getFirstValue());
+            verify(fileReader, times(1)).read(anyString());
+            verify(fileSplitter, times(1)).split(anyString());
+            verify(markdownToHtmlConverter, times(0)).convert(anyString());
             verify(fileWriter, times(0))
-                    .write(targetFileName + sourceFileName
-                    .replace(".md", ".html"), htmlContent);
+                    .write(anyString(), anyString());
             verify(htmlValidator, times(0))
-                    .validateHtml(targetFileName + sourceFileName
-                    .replace(".md", ".html"));
+                    .validateHtml(anyString());
         } catch (Exception e) {
             fail("An error occur and an exception was raised but it shouldn't be the case"
                     + e.getMessage());
@@ -373,13 +393,13 @@ class BuildPageTest {
             // THEN
             verify(fileReader, times(1)).read(sourceFileName);
             verify(fileSplitter, times(1)).split(randomMarkdownContent);
-            verify(markdownToHtmlConverter, times(0)).convert(pair.getFirstValue());
+            verify(fileReader, times(1)).read(anyString());
+            verify(fileSplitter, times(1)).split(anyString());
+            verify(markdownToHtmlConverter, times(0)).convert(anyString());
             verify(fileWriter, times(0))
-                    .write(targetFileName + sourceFileName
-                            .replace(".md", ".html"), htmlContent);
+                    .write(anyString(), anyString());
             verify(htmlValidator, times(0))
-                    .validateHtml(targetFileName + sourceFileName
-                            .replace(".md", ".html"));
+                    .validateHtml(anyString());
         } catch (Exception e) {
             fail("An error occur and an exception was raised but it shouldn't be the case"
                     + e.getMessage());
@@ -396,15 +416,13 @@ class BuildPageTest {
                     "The source File Provided is not a markdown");
 
             // THEN
-            verify(fileReader, times(0)).read(sourceFileName);
-            verify(fileSplitter, times(0)).split(randomMarkdownContent);
-            verify(markdownToHtmlConverter, times(0)).convert(pair.getFirstValue());
+            verify(fileReader, times(0)).read(anyString());
+            verify(fileSplitter, times(0)).split(anyString());
+            verify(markdownToHtmlConverter, times(0)).convert(anyString());
             verify(fileWriter, times(0))
-                    .write(targetFileName + sourceFileName
-                            .replace(".md", ".html"), htmlContent);
+                    .write(anyString(), anyString());
             verify(htmlValidator, times(0))
-                    .validateHtml(targetFileName + sourceFileName
-                            .replace(".md", ".html"));
+                    .validateHtml(anyString());
         } catch (Exception e) {
             fail("An error occur and an exception was raised but it shouldn't be the case"
                     + e.getMessage());
@@ -427,14 +445,14 @@ class BuildPageTest {
             // THEN
             verify(fileReader, times(1)).read(sourceFileName);
             verify(fileSplitter, times(1)).split(randomMarkdownContent);
+            verify(fileReader, times(1)).read(anyString());
+            verify(fileSplitter, times(1)).split(anyString());
             verify(parserToml, times(1)).parse(anyString());
-            verify(markdownToHtmlConverter, times(0)).convert(pair.getFirstValue());
+            verify(markdownToHtmlConverter, times(0)).convert(anyString());
             verify(fileWriter, times(0))
-                    .write(targetFileName + sourceFileName
-                            .replace(".md", ".html"), htmlContent);
+                    .write(anyString(), anyString());
             verify(htmlValidator, times(0))
-                    .validateHtml(targetFileName + sourceFileName
-                            .replace(".md", ".html"));
+                    .validateHtml(anyString());
         } catch (Exception e) {
             fail("An error occur and an exception was raised but it shouldn't be the case"
                     + e.getMessage());
@@ -457,13 +475,14 @@ class BuildPageTest {
             verify(fileReader, times(1)).read(sourceFileName);
             verify(fileSplitter, times(1)).split(randomMarkdownContent);
             verify(parserToml, times(1)).parse("draft = true");
-            verify(markdownToHtmlConverter, times(0)).convert(pairTrue.getFirstValue());
+            verify(fileReader, times(1)).read(anyString());
+            verify(fileSplitter, times(1)).split(anyString());
+            verify(parserToml, times(1)).parse(anyString());
+            verify(markdownToHtmlConverter, times(0)).convert(anyString());
             verify(fileWriter, times(0))
-                    .write(targetFileName + sourceFileName
-                            .replace(".md", ".html"), htmlContent);
+                    .write(anyString(), anyString());
             verify(htmlValidator, times(0))
-                    .validateHtml(targetFileName + sourceFileName
-                            .replace(".md", ".html"));
+                    .validateHtml(anyString());
         } catch (Exception e) {
             fail("An error occur and an exception was raised but it shouldn't be the case"
                     + e.getMessage());
@@ -495,6 +514,14 @@ class BuildPageTest {
             verify(htmlValidator, times(1))
                     .validateHtml(targetFileName + sourceFileName
                             .replace(".md", ".html"));
+            verify(fileReader, times(1)).read(anyString());
+            verify(fileSplitter, times(1)).split(anyString());
+            verify(parserToml, times(1)).parse(anyString());
+            verify(markdownToHtmlConverter, times(1)).convert(anyString());
+            verify(fileWriter, times(1))
+                    .write(anyString(), anyString());
+            verify(htmlValidator, times(1))
+                    .validateHtml(anyString());
         } catch (Exception e) {
             fail("An error occur and an exception was raised but it shouldn't be the case"
                     + e.getMessage());
