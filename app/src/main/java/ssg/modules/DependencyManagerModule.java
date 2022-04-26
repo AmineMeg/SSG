@@ -1,10 +1,12 @@
 package ssg.modules;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.name.Names;
 import ssg.Generated;
+import ssg.buildsite.BuildSite;
+import ssg.buildsite.BuildSiteImplementation;
 import ssg.dependencymanager.DependencyManager;
-import ssg.dependencymanager.DependencyManagerImplementation;
 import ssg.filemodifiedmanager.FileModifiedManager;
 import ssg.filemodifiedmanager.FileModifiedManagerImplementation;
 import ssg.filereader.FileReader;
@@ -27,7 +29,6 @@ public class DependencyManagerModule extends AbstractModule {
      */
     @Override
     protected void configure() {
-        bind(DependencyManager.class).to(DependencyManagerImplementation.class);
         bind(FileModifiedManager.class)
                 .annotatedWith(Names.named("FileModifiedManager"))
                 .to(FileModifiedManagerImplementation.class);
