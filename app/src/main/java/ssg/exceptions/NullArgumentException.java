@@ -6,7 +6,9 @@ package ssg.exceptions;
 public final class NullArgumentException extends Exception {
 
     /**
-     * Constructor.
+     * Exception constructor.
+     *
+     * @param errorMessage error message.
      */
     public NullArgumentException(String errorMessage) {
         super(errorMessage);

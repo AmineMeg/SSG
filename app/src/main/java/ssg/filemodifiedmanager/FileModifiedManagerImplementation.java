@@ -8,10 +8,13 @@ import java.nio.file.attribute.FileTime;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import ssg.Generated;
+import ssg.config.SiteStructureVariable;
 
 /**
  * Implementation of FileModifiedManager.
  */
+@Generated
 @SuppressWarnings("PMD.LawOfDemeter")
 public class FileModifiedManagerImplementation implements FileModifiedManager {
 
@@ -21,50 +24,59 @@ public class FileModifiedManagerImplementation implements FileModifiedManager {
     private static final Logger logger = LogManager.getLogger();
 
     /**
+     * Constant path_separator.
+     */
+    public static final String PATH_SEPARATOR = "/";
+
+    /**
      * Determines if a source file was modified since it was last computed.
      *
-     * @param path the file that we will analyze to determine if it was modified
-     * @param outputDirectory the expected outputDirectory for computed files
-     * @return true if the file was modified otherwise false
+     * @param path the file that we will analyze to determine if it was modified.
+     * @param outputDirectory the expected outputDirectory for computed files.
+     * @return true if the file was modified otherwise false.
+     * @throws IOException when file didn't exist or couldn't get the last modified time.
      */
     @Override
     public boolean wasFileModified(String path, String outputDirectory) throws IOException {
 
-        logger.info("FileModifiedManager : determining if file {} "
+        logger.info("wasFileModified() : determining if file {} "
                 + "was modified since last build", path);
-        if (doesFileExists(path)) {
-
+        Path pathTypePath = Path.of(path);
+        if (Files.exists(pathTypePath)) {
             try {
-                FileTime inputFileTime = Files.getLastModifiedTime(Path.of(path));
+                FileTime inputFileTime = Files.getLastModifiedTime(pathTypePath);
                 File file = new File(FilenameUtils.getName(path));
-                String fileOutputName = outputDirectory
-                        + Path.of(file.getName())
-                        .toString()
+
+                String fileOutputName = Path.of(file.getName()).toString()
                         .replace(".md", ".html");
 
-                FileTime outputFileTime = Files.getLastModifiedTime(Path.of(fileOutputName));
+                int i = 0;
+                for (String subPath : path.split(PATH_SEPARATOR)) {
+                    if (SiteStructureVariable.RAW_CONTENTS.equals(subPath)) {
+                        break;
+                    }
+                    i++;
+                }
 
-                return inputFileTime.compareTo(outputFileTime) > 0;
+                Path base = pathTypePath.subpath(i, pathTypePath.getNameCount() - 1);
+                Path pathOutputName = Path.of(outputDirectory
+                        + base + PATH_SEPARATOR + fileOutputName);
 
+                if (Files.exists(pathOutputName)) {
+
+                    FileTime outputFileTime = Files.getLastModifiedTime(pathOutputName);
+                    return inputFileTime.compareTo(outputFileTime) > 0;
+                } else {
+                    logger.info("wasFileModified() : file {} didn't exists", pathOutputName);
+                    return true;
+                }
             } catch (IOException e) {
-                logger.error("FileModifiedManager : Couldn't get the last modified time ", e);
+                logger.error("wasFileModified() : Couldn't get the last modified time ", e);
                 throw e;
             }
         }
 
-        return false;
+        return true;
     }
 
-    /**
-     * Determines if a source file exists.
-     *
-     * @param path the file that we will analyze to determine if it exists
-     * @return true if the file exists otherwise false
-     */
-    @Override
-    public boolean doesFileExists(String path) {
-        logger.info("FileModifiedManager : determining if file {} exists", path);
-        File file = new File(FilenameUtils.getName(path));
-        return file.exists();
-    }
 }

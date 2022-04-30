@@ -17,6 +17,10 @@ import ssg.markdowntohtmlconverter.MarkdownToHtmlConverter;
 import ssg.markdowntohtmlconverter.MarkdownToHtmlConverterImplementation;
 import ssg.parsertoml.ParserToml;
 import ssg.parsertoml.ParserTomlImplementation;
+import ssg.templatehandler.TemplateHandler;
+import ssg.templatehandler.TemplateHandlerImplementation;
+import ssg.templatehandler.TemplateProcesser;
+import ssg.templatehandler.TemplateProcesserImplementation;
 
 /**
  * Module class for BuildPage.
@@ -43,9 +47,12 @@ public class BuildPageModule extends AbstractModule {
         bind(MarkdownToHtmlConverter.class)
                 .annotatedWith(Names.named("MarkdownToHtmlConverter"))
                 .to(MarkdownToHtmlConverterImplementation.class);
-        // TODO: bind(TemplateHandler.class)
-        //  .annotatedWith(Names.named("TemplateHandler"))
-        //  .to(FileReaderImplementation.class);
+        bind(TemplateHandler.class)
+                .annotatedWith(Names.named("TemplateHandler"))
+                .to(TemplateHandlerImplementation.class);
+        bind(TemplateProcesser.class)
+                .annotatedWith(Names.named("TemplateProcesser"))
+                .to(TemplateProcesserImplementation.class);
         bind(FileWriter.class)
                 .annotatedWith(Names.named("FileWriter"))
                 .to(FileWriterImplementation.class);

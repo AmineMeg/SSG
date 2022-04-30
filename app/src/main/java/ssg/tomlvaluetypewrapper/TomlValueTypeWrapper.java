@@ -6,6 +6,8 @@ package ssg.tomlvaluetypewrapper;
 public abstract class TomlValueTypeWrapper {
     /**
      * Return the info into a String.
+     *
+     * @return TOML String.
      */
     @Override
     public abstract String toString();

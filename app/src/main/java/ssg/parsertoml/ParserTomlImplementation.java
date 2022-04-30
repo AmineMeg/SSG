@@ -44,9 +44,9 @@ public final class ParserTomlImplementation implements ParserToml {
     /**
      * Parse TOML into HashMap.
 
-     * @param buffer toml content to parse
-     * @return toml parse into Map of String TomlValueTypeWrapper
-     * @throws IOException if the path is wrong
+     * @param buffer toml content to parse.
+     * @return toml parse into Map of String TomlValueTypeWrapper.
+     * @throws IOException if the path is wrong.
      */
     @SuppressFBWarnings
     @Override
@@ -58,9 +58,9 @@ public final class ParserTomlImplementation implements ParserToml {
     /**
      * Pretreatment for some String cases not considered by tomlj.
 
-     * @param buffer content to parse
-     * @return the String parsed of path
-     * @throws IOException case file doesn not exist
+     * @param buffer content to parse.
+     * @return the String parsed of path.
+     * @throws IOException case file does not exist.
      */
     public String pretreatmentToml(String buffer) throws IOException {
         String toWrite = stringCases(buffer);
@@ -71,8 +71,8 @@ public final class ParserTomlImplementation implements ParserToml {
      * Avoid new line when the string is a triple quote string 
      * and the line ended with '\'.
 
-     * @param readedString from the file to treat
-     * @return the string parsed
+     * @param readedString from the file to treat.
+     * @return the string parsed.
      */
     @SuppressWarnings({"PMD.LawOfDemeter", "PMD.CyclomaticComplexity", "PMD.CognitiveComplexity"})
     static String stringCases(String readedString) {
@@ -111,9 +111,9 @@ public final class ParserTomlImplementation implements ParserToml {
     /**
      * Parse TOML in TomlParseResult.
 
-     * @param buffer  toml to parse
-     * @return toml parse into TomlParseResult
-     * @throws IOException if the path is wrong
+     * @param buffer  toml to parse.
+     * @return toml parse into TomlParseResult.
+     * @throws IOException if the path is wrong.
      */
     @SuppressWarnings("PMD.LawOfDemeter")
     @SuppressFBWarnings
@@ -124,10 +124,10 @@ public final class ParserTomlImplementation implements ParserToml {
     }
 
     /**
-     * Parse TomlParseResult in dictionnary.
+     * Parse TomlParseResult in dictionary.
 
-     * @param toml result of parsing by tomlj
-     * @return Map key/value
+     * @param toml result of parsing by toml.
+     * @return Map key/value.
      */
     static Map<String,TomlValueTypeWrapper> parseToMap(TomlParseResult toml) {
         Map<String,TomlValueTypeWrapper> ret = new HashMap<String,TomlValueTypeWrapper>();
@@ -157,9 +157,9 @@ public final class ParserTomlImplementation implements ParserToml {
     /**
      * Method to parse poly type array.
 
-     * @param res hashmap already treated
-     * @param toWrite string toWrite
-     * @return hashmap with poly type array
+     * @param res hashmap already treated.
+     * @param toWrite string toWrite.
+     * @return hashmap with poly type array.
      */
     @SuppressWarnings("PMD.LawOfDemeter")
     private static Map<String,TomlValueTypeWrapper> 
@@ -191,8 +191,8 @@ public final class ParserTomlImplementation implements ParserToml {
     /**
      * Parse an object in a TomlValueWrapper.
 
-     * @param o object to parse from TomlParseResult
-     * @return TomlValueTypeWrapper corresponding to o
+     * @param o object to parse from TomlParseResult.
+     * @return TomlValueTypeWrapper corresponding to o.
      */
     @SuppressWarnings({"PMD.LawOfDemeter", "PMD.CyclomaticComplexity"})
     private static TomlValueTypeWrapper parseObject(Object o) {
@@ -222,9 +222,10 @@ public final class ParserTomlImplementation implements ParserToml {
     }
 
     /**
-     * Function converting objects inside a toString array into 
+     * Function converting objects inside a toString array into
      * TomlValueTypeWrapper with TomlValueTypeWrapper objects inside.
-
+     *
+     * @param value the string that we convert.
      * @return the TomlValueTypeWrapper corresponding to the object.
      */
     public static TomlValueTypeWrapper convertObject(String value) {

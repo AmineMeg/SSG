@@ -8,10 +8,11 @@ import java.io.IOException;
 public interface InterfaceStaticFileHandler {
 
     /**
-    * Copy the static directory from source to target.
-    *
-    * @param staticSrcDirectory static source directory.
-    * @param staticDstDirectory static destination directory.
-    */
+     * Copy static directory.
+     *
+     * @param staticSrcDirectory static source directory.
+     * @param staticDstDirectory static destination directory.
+     * @throws IOException when there is a problem with the static directory.
+     */
     void handle(String staticSrcDirectory, String staticDstDirectory) throws IOException;
 }

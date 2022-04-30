@@ -47,6 +47,7 @@ public class FileSplitterImplementation implements FileSplitter {
      * @param buffer text of the parsed file .md.
      * @return a Pair containing the content and the metadata separately.
      * @throws MetadataException if the metadata is not properly declared.
+     * @throws NullArgumentException Pair has a null argument.
      */
     @Override
     public Pair<String, Optional<String>> split(String buffer)
@@ -62,7 +63,7 @@ public class FileSplitterImplementation implements FileSplitter {
                 errorDeclaration(lines[0], 1);
                 return metadataPresent(lines);
             }
-            // buffer doesnt start with the metadata delimiter
+            // buffer doesn't start with the metadata delimiter
             // check that there is no metadata delimiter inside
 
             for (int i = 1; i < lines.length; i++) {
@@ -92,6 +93,7 @@ public class FileSplitterImplementation implements FileSplitter {
      * @param lines text lines separated in an array.
      * @return a Pair containing the content and the metadata separately.
      * @throws MetadataException if the metadata is not properly declared.
+     * @throws NullArgumentException ignoreString must not be null.
      */
     private Pair<String, Optional<String>> metadataPresent(String... lines)
             throws MetadataException, NullArgumentException {
@@ -99,7 +101,7 @@ public class FileSplitterImplementation implements FileSplitter {
         final StringBuilder content = new StringBuilder();
         StringBuilder metadata = new StringBuilder();
 
-        // Metadatas
+        // Metadata
         int i;
         for (i = 1; i < lines.length; i++) {
             if (ENCAPSULATION.equals(lines[i].strip())) {

@@ -29,7 +29,7 @@ public final class ConfigurationManager {
     private static Configuration myCurrentConfiguration;
 
     /**
-     * private constructor to avoid instanciation.
+     * private constructor to avoid instantiation.
      */
     private ConfigurationManager() {}
 
@@ -39,18 +39,28 @@ public final class ConfigurationManager {
      * @return a configuration manager.
      */
     public static ConfigurationManager getInstance() {
-        if (myConfigurationManager == null) {
-            myConfigurationManager = new ConfigurationManager();
+        if (myConfigurationManager != null) {
+            return  myConfigurationManager;
         }
-        return myConfigurationManager;
+
+        synchronized (ConfigurationManager.class) {
+            if (myConfigurationManager == null) {
+                myConfigurationManager = new ConfigurationManager();
+            }
+
+            return myConfigurationManager;
+        }
     }
 
     /**
      * Used to load a configuration file by the path provided.
      *
      * @param filePath path to config file.
+     * @throws HttpConfigurationException when there is a parsing error in the configuration file.
+     * @throws IOException when there is a closing file error 
      */
-    public void loadConfigurationFile(String filePath) throws HttpConfigurationException {
+    public void loadConfigurationFile(String filePath) 
+            throws HttpConfigurationException, IOException {
         StringBuilder sb = readConfigFile(filePath);
         JsonNode configuration = getJsonNode(sb);
         setCurrentConfiguration(configuration);
@@ -76,7 +86,8 @@ public final class ConfigurationManager {
         return configuration;
     }
 
-    private StringBuilder readConfigFile(String filePath) throws HttpConfigurationException {
+    private StringBuilder readConfigFile(String filePath) 
+            throws HttpConfigurationException, IOException {
         FileReader fileReader;
         try {
             fileReader = new FileReader(filePath);
@@ -90,8 +101,11 @@ public final class ConfigurationManager {
                 sb.append((char) i);
             }
         } catch (IOException e) {
+            fileReader.close();
             throw new HttpConfigurationException(e);
         }
+
+        fileReader.close();
         return sb;
     }
 

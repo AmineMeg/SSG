@@ -8,7 +8,6 @@ import nu.validator.xml.SystemErrErrorHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ssg.Generated;
-import ssg.filewriter.FileWriterImplementation;
 
 /**
  * /!\ NOT WORKING: Class which implement HtmlValidator using v.Nu validator HTML Checker.
@@ -39,7 +38,6 @@ public class HtmlValidatorNu implements HtmlValidator {
         validator.setUpMainSchema("https://validator.w3.org/nu/", new SystemErrErrorHandler());
         validator.setUpValidatorAndParsers(errorHandler,true,false);
         validator.checkHtmlFile(new File(htmlFileName),true);
-
         if (errorHandler.getErrors() > 0) {
             logger.info("validateHtml(): There was {} errors in the html file",
                     errorHandler.getErrors()

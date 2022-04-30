@@ -16,7 +16,7 @@ import ssg.Generated;
 public final class Json {
 
     /**
-     * Private Constructor to make it an utility class.
+     * Private Constructor to make it a utility class.
      */
     private Json() {}
 
@@ -50,11 +50,11 @@ public final class Json {
     /**
      * Convert Json to an instance of the class.
      *
-     * @param node a JsonNode
-     * @param clazz generic class
-     * @param <T> generic class
-     * @return an instance of the generic class
-     * @throws JsonProcessingException when there is a problem during the process
+     * @param node a JsonNode.
+     * @param clazz generic class.
+     * @param <T> generic class.
+     * @return an instance of the generic class.
+     * @throws JsonProcessingException when there is a problem during the process.
      */
     public static <T> T fromJson(JsonNode node, Class<T> clazz) throws JsonProcessingException {
         return myObjectMapper.treeToValue(node, clazz);
@@ -75,7 +75,7 @@ public final class Json {
      *
      * @param node a JsonNode.
      * @return a String representing the Json.
-     * @throws JsonProcessingException when there is a problem during the process
+     * @throws JsonProcessingException when there is a problem during the process.
      */
     public static String stringify(JsonNode node) throws JsonProcessingException {
         return generateJson(node, false);

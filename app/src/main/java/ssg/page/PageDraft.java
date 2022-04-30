@@ -7,7 +7,7 @@ import ssg.tomlvaluetypewrapper.TomlValueTypeWrapper;
 
 /**
  * A page draft used to build the page around a metadata.
- * table and a buffer containing the onbuild page.
+ * table and a buffer containing the on build page.
  */
 public class PageDraft {
 
@@ -22,16 +22,16 @@ public class PageDraft {
     private final String content;
 
     /**
-     * Optional page datas.
+     * Optional page data.
      */
     private final Optional<Map<String, TomlValueTypeWrapper>> data;
 
     /**
      * Constructor.
      *
-     * @param data page data
-     * @param content page content 
-     * @param title page title
+     * @param data page data.
+     * @param content page content.
+     * @param title page title.
      */
     public PageDraft(Map<String, TomlValueTypeWrapper> data, String content, String title) {
         this.data = Optional.ofNullable(data);
@@ -40,7 +40,9 @@ public class PageDraft {
     }
 
     /**
-     * Return page datas.
+     * Return page data.
+     *
+     * @return page data.
      */
     public Optional<Map<String, TomlValueTypeWrapper>> getData() {
         return data;
@@ -48,6 +50,8 @@ public class PageDraft {
 
     /**
      * Return page title.
+     *
+     * @return page title.
      */
     public String getTitle() {
         return title;
@@ -55,6 +59,8 @@ public class PageDraft {
 
     /**
      * Return page content.
+     *
+     * @return page content.
      */
     public String getContent() {
         return content;

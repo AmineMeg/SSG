@@ -17,6 +17,8 @@ plugins {
     id 'com.adarshr.test-logger' version '3.1.0'
 }
 
+applicationDefaultJvmArgs = ["--add-opens=java.base/java.lang=ALL-UNNAMED", "--add-opens=java.base/java.io=ALL-UNNAMED", "--add-opens=java.base/java.util=ALL-UNNAMED"]
+
 repositories {
     // Use Maven Central for resolving dependencies.
     mavenCentral()
@@ -37,7 +39,11 @@ dependencies {
     implementation 'info.picocli:picocli:4.6.3'
     annotationProcessor 'info.picocli:picocli-codegen:4.6.3'
 
+    //https://github.com/commonmark/commonmark-java
     implementation 'org.commonmark:commonmark:0.18.2'
+
+    //https://github.com/HubSpot/jinjava
+    implementation 'com.hubspot.jinjava:jinjava:2.6.0'
 
     spotbugs 'com.github.spotbugs:spotbugs:4.6.0'
 
@@ -47,6 +53,10 @@ dependencies {
 
     // https://mvnrepository.com/artifact/com.google.inject/guice
     implementation group: 'com.google.inject', name: 'guice', version: '5.1.0'
+
+    // https://mvnrepository.com/artifact/com.google.inject/guice
+    implementation group: 'com.google.inject.extensions', name: 'guice-assistedinject', version: '5.1.0'
+
 
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.17.1'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.17.1'

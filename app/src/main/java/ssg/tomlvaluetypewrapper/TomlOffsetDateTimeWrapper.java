@@ -13,6 +13,8 @@ public class TomlOffsetDateTimeWrapper extends TomlValueTypeWrapper {
 
     /**
      * Constructor.
+     *
+     * @param value the value that we wrap.
      */
     public TomlOffsetDateTimeWrapper(OffsetDateTime value) {
         this.value = value;

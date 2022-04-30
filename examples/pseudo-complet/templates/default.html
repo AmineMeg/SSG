@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <title>{{ metadata.title }}</title>
+    <link href="{{metadata.css}}" rel="stylesheet">
+    <link href="../static/stylesheetindex.css" rel="stylesheet">
+    <meta charset="UTF-8">
+  </head>
+  <body id="index">
+    {% include "menu.html" %}
+    <div class="content">
+      {{ content }}
+    </div>
+    <div class="files">
+      <h3>On détaille ici l'arborescence depuis laquelle ce merveilleux site a été traduit :</h3>
+      <h3>Dans le dossier content :</h3>
+      <ul>
+      {% for str in list_files("", true) %}
+      <li>{{str}}</li>
+      {% endfor %}
+      </ul>
+      <h3>Dans le dossier static :</h3>
+      <ul>
+      {% for str in list_files("../static", true) %}
+      <li>{{str}}</li>
+      {% endfor %}
+      </ul>
+      <h3>Dans le dossier templates :</h3>
+      <ul>
+      {% for str in list_files("../templates", true) %}
+      <li>{{str}}</li>
+      {% endfor %}
+      </ul>
+    </div>
+  </body>
+</html>

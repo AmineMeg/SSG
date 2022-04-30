@@ -2,6 +2,7 @@ package ssg.buildpage;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
@@ -21,9 +22,11 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import ssg.dependencymanager.DependencyManager;
 import ssg.exceptions.MetadataException;
 import ssg.exceptions.NotMarkdownException;
 import ssg.exceptions.NullArgumentException;
+import ssg.exceptions.TemplateHandlerException;
 import ssg.filereader.FileReader;
 import ssg.filesplitter.FileSplitter;
 import ssg.filewriter.FileWriter;
@@ -31,6 +34,7 @@ import ssg.htmlvalidator.HtmlValidator;
 import ssg.markdowntohtmlconverter.MarkdownToHtmlConverter;
 import ssg.pair.Pair;
 import ssg.parsertoml.ParserToml;
+import ssg.templatehandler.TemplateHandler;
 import ssg.tomlvaluetypewrapper.TomlBooleanWrapper;
 import ssg.tomlvaluetypewrapper.TomlValueTypeWrapper;
 
@@ -39,7 +43,7 @@ import ssg.tomlvaluetypewrapper.TomlValueTypeWrapper;
  */
 @SuppressWarnings({"PMD.LawOfDemeter", "PMD.AvoidCatchingGenericException",
     "PMD.GuardLogStatement", "PMD.SignatureDeclareThrowsException",
-    "PMD.RedundantFieldInitializer",
+    "PMD.RedundantFieldInitializer", "PMD.TooManyMethods",
     "PMD.MutableStaticState", "PMD.ExcessiveImports", "PMD.DoubleBraceInitialization"})
 class BuildPageTest {
 
@@ -77,7 +81,8 @@ class BuildPageTest {
     /**
      * TemplateHandler dependency.
      */
-    //private TemplateHandler templateHandler;
+    @Inject
+    private final TemplateHandler templateHandler = Mockito.mock(TemplateHandler.class);
 
     /**
      * FileWriter dependency.
@@ -115,7 +120,9 @@ class BuildPageTest {
             bind(ParserToml.class)
                     .annotatedWith(Names.named("ParserToml"))
                     .toInstance(parserToml);
-
+            bind(TemplateHandler.class)
+                    .annotatedWith(Names.named("TemplateHandler"))
+                    .toInstance(templateHandler);
         }
     });
 
@@ -131,6 +138,11 @@ class BuildPageTest {
      * target file name for test.
      */
     static final String targetFileName = "toto/";
+
+    /**
+     * target file name for test.
+     */
+    static final String targetFileName1 = "toto/content/";
     /**
      * random markdown content for test.
      */
@@ -148,20 +160,22 @@ class BuildPageTest {
     /**
      * Map for metadata for test.
      */
-    static final Map draftTrue =  new HashMap<String, TomlValueTypeWrapper>() {
-        {
-            put("draft", new TomlBooleanWrapper(true));
-        }
-    };
+    static final Map<String, TomlValueTypeWrapper> draftTrue =  
+        new HashMap<String, TomlValueTypeWrapper>() {
+            {
+                put("draft", new TomlBooleanWrapper(true));
+            }
+        };
 
     /**
      * Map for metadata for test.
      */
-    static final Map draftFalse =  new HashMap<String, TomlValueTypeWrapper>() {
-        {
-            put("draft", new TomlBooleanWrapper(false));
-        }
-    };
+    static final Map<String, TomlValueTypeWrapper> draftFalse =  
+        new HashMap<String, TomlValueTypeWrapper>() {
+            {
+                put("draft", new TomlBooleanWrapper(false));
+            }
+        };
 
 
     /**
@@ -171,7 +185,7 @@ class BuildPageTest {
 
     static {
         try {
-            pair = new Pair(htmlContent, Optional.of(randomMetadata));
+            pair = new Pair<String,Optional<String>>(htmlContent, Optional.of(randomMetadata));
         } catch (NullArgumentException e) {
             fail(e);
         }
@@ -184,7 +198,7 @@ class BuildPageTest {
 
     static {
         try {
-            pairTrue = new Pair(htmlContent, Optional.of("draft = true"));
+            pairTrue = new Pair<String,Optional<String>>(htmlContent, Optional.of("draft = true"));
         } catch (NullArgumentException e) {
             fail(e);
         }
@@ -197,7 +211,9 @@ class BuildPageTest {
 
     static {
         try {
-            pairFalse = new Pair(htmlContent, Optional.of("draft = false"));
+            pairFalse = new Pair<String,Optional<String>>(
+                htmlContent, Optional.of("draft = false")
+            );
         } catch (NullArgumentException e) {
             fail(e);
         }
@@ -208,6 +224,7 @@ class BuildPageTest {
      */
     @BeforeEach
      void setup() {
+        DependencyManager.getInstance(targetFileName, targetFileName);
         buildPage = new BuildPageImplementation();
         injector.injectMembers(buildPage);
     }
@@ -219,10 +236,11 @@ class BuildPageTest {
             when(fileReader.read(sourceFileName)).thenReturn(randomMarkdownContent);
             when(fileSplitter.split(randomMarkdownContent)).thenReturn(pair);
             when(markdownToHtmlConverter.convert(pair.getFirstValue())).thenReturn(htmlContent);
-            doNothing().when(fileWriter).write(targetFileName, pair.getFirstValue());
+            when(templateHandler.handle(any(), any())).thenReturn(htmlContent);
+            doNothing().when(fileWriter).write(targetFileName1, pair.getFirstValue());
 
             // WHEN
-            this.buildPage.run(sourceFileName, targetFileName);
+            this.buildPage.run(sourceFileName, targetFileName1);
 
             // THEN
             // Verify arguments
@@ -230,10 +248,10 @@ class BuildPageTest {
             verify(fileSplitter, times(1)).split(randomMarkdownContent);
             verify(markdownToHtmlConverter, times(1)).convert(pair.getFirstValue());
             verify(fileWriter, times(1))
-                    .write(targetFileName + sourceFileName
+                    .write(targetFileName1 + sourceFileName
                             .replace(".md", ".html"), htmlContent);
             verify(htmlValidator, times(1))
-                    .validateHtml(targetFileName + sourceFileName.replace(".md", ".html"));
+                    .validateHtml(targetFileName1 + sourceFileName.replace(".md", ".html"));
 
             //Verify number of call
             verify(fileReader, times(1)).read(anyString());
@@ -256,10 +274,11 @@ class BuildPageTest {
             when(fileReader.read(sourceFileName)).thenReturn(randomMarkdownContent);
             when(fileSplitter.split(randomMarkdownContent)).thenReturn(pair);
             when(markdownToHtmlConverter.convert(pair.getFirstValue())).thenReturn(htmlContent);
-            doNothing().when(fileWriter).write(targetFileName, pair.getFirstValue());
+            when(templateHandler.handle(any(), any())).thenReturn(htmlContent);
+            doNothing().when(fileWriter).write(targetFileName1, pair.getFirstValue());
 
             // WHEN
-            this.buildPage.run(sourceFileName, targetFileName);
+            this.buildPage.run(sourceFileName, targetFileName1);
 
             // THEN
             // Verify arguments
@@ -267,10 +286,10 @@ class BuildPageTest {
             verify(fileSplitter, times(1)).split(randomMarkdownContent);
             verify(markdownToHtmlConverter, times(1)).convert(pair.getFirstValue());
             verify(fileWriter, times(1))
-                    .write(targetFileName + sourceFileName
+                    .write(targetFileName1 + sourceFileName
                             .replace(".md", ".html"), htmlContent);
             verify(htmlValidator, times(1))
-                    .validateHtml(targetFileName + sourceFileName.replace(".md", ".html"));
+                    .validateHtml(targetFileName1 + sourceFileName.replace(".md", ".html"));
 
             //Verify number of call
             verify(fileReader, times(1)).read(anyString());
@@ -281,8 +300,7 @@ class BuildPageTest {
             verify(htmlValidator, times(1))
                     .validateHtml(anyString());
         } catch (Exception e) {
-            fail("An error occur and an exception was raised but it shouldn't be the case"
-                    + e.getMessage());
+            fail(e);
         }
     }
 
@@ -307,8 +325,7 @@ class BuildPageTest {
             verify(htmlValidator, times(0))
                     .validateHtml(anyString());
         } catch (Exception e) {
-            fail("An error occur and an exception was raised but it shouldn't be the case"
-                    + e.getMessage());
+            fail(e);
         }
     }
 
@@ -319,14 +336,15 @@ class BuildPageTest {
             when(fileReader.read(sourceFileName)).thenReturn(randomMarkdownContent);
             when(fileSplitter.split(randomMarkdownContent)).thenReturn(pair);
             when(markdownToHtmlConverter.convert(pair.getFirstValue())).thenReturn(htmlContent);
+            when(templateHandler.handle(any(), any())).thenReturn(htmlContent);
             doThrow(new IOException())
                     .when(fileWriter)
-                    .write(targetFileName + sourceFileName
+                    .write(targetFileName1 + sourceFileName
                             .replace(".md", ".html"), htmlContent);
             // WHEN
             assertThrows(
                     IOException.class,
-                    () -> this.buildPage.run(sourceFileName, targetFileName),
+                    () -> this.buildPage.run(sourceFileName, targetFileName1),
                     "write failed so the function did raise IOException");
 
             // THEN
@@ -334,7 +352,7 @@ class BuildPageTest {
             verify(fileSplitter, times(1)).split(randomMarkdownContent);
             verify(markdownToHtmlConverter, times(1)).convert(pair.getFirstValue());
             verify(fileWriter, times(1))
-                    .write(targetFileName + sourceFileName
+                    .write(targetFileName1 + sourceFileName
                             .replace(".md", ".html"), htmlContent);
             verify(fileReader, times(1)).read(anyString());
             verify(fileSplitter, times(1)).split(anyString());
@@ -344,8 +362,7 @@ class BuildPageTest {
             verify(htmlValidator, times(0))
                     .validateHtml(anyString());
         } catch (Exception e) {
-            fail("An error occur and an exception was raised but it shouldn't be the case"
-                    + e.getMessage());
+            fail(e);
         }
     }
 
@@ -373,8 +390,7 @@ class BuildPageTest {
             verify(htmlValidator, times(0))
                     .validateHtml(anyString());
         } catch (Exception e) {
-            fail("An error occur and an exception was raised but it shouldn't be the case"
-                    + e.getMessage());
+            fail(e);
         }
     }
 
@@ -401,8 +417,7 @@ class BuildPageTest {
             verify(htmlValidator, times(0))
                     .validateHtml(anyString());
         } catch (Exception e) {
-            fail("An error occur and an exception was raised but it shouldn't be the case"
-                    + e.getMessage());
+            fail(e);
         }
     }
 
@@ -424,8 +439,7 @@ class BuildPageTest {
             verify(htmlValidator, times(0))
                     .validateHtml(anyString());
         } catch (Exception e) {
-            fail("An error occur and an exception was raised but it shouldn't be the case"
-                    + e.getMessage());
+            fail(e);
         }
     }
 
@@ -454,8 +468,36 @@ class BuildPageTest {
             verify(htmlValidator, times(0))
                     .validateHtml(anyString());
         } catch (Exception e) {
-            fail("An error occur and an exception was raised but it shouldn't be the case"
-                    + e.getMessage());
+            fail(e);
+        }
+    }
+
+    @Test
+    void conversionFailedBecauseTemplateHandlingFailed() {
+        try {
+            when(fileReader.read(sourceFileName)).thenReturn(randomMarkdownContent);
+            when(fileSplitter.split(randomMarkdownContent)).thenReturn(pair);
+            when(markdownToHtmlConverter.convert(pair.getFirstValue())).thenReturn(htmlContent);
+            when(templateHandler.handle(any(), any()))
+                .thenThrow(new TemplateHandlerException("test exception"));
+
+            // WHEN
+            assertThrows(TemplateHandlerException.class,
+                    () -> this.buildPage.run(sourceFileName, targetFileName1),
+                    "TemplateHandling failed so the function did raise TemplateHandlerException");
+
+            // THEN
+            verify(fileReader, times(1)).read(sourceFileName);
+            verify(fileSplitter, times(1)).split(randomMarkdownContent);
+            verify(fileReader, times(1)).read(anyString());
+            verify(fileSplitter, times(1)).split(anyString());
+            verify(parserToml, times(1)).parse(anyString());
+            verify(markdownToHtmlConverter, times(1)).convert(anyString());
+            verify(templateHandler, times(1)).handle(any(), any());
+            verify(fileWriter, times(0)).write(anyString(), anyString());
+            verify(htmlValidator, times(0)).validateHtml(anyString());
+        } catch (Exception e) {
+            fail(e);
         }
     }
 
@@ -484,8 +526,7 @@ class BuildPageTest {
             verify(htmlValidator, times(0))
                     .validateHtml(anyString());
         } catch (Exception e) {
-            fail("An error occur and an exception was raised but it shouldn't be the case"
-                    + e.getMessage());
+            fail(e);
         }
     }
 
@@ -498,10 +539,11 @@ class BuildPageTest {
             when(parserToml.parse(pairFalse.getSecondValue().get()))
                     .thenReturn(draftFalse);
             when(markdownToHtmlConverter.convert(pair.getFirstValue())).thenReturn(htmlContent);
-            doNothing().when(fileWriter).write(targetFileName, pair.getFirstValue());
+            when(templateHandler.handle(any(), any())).thenReturn(htmlContent);
+            doNothing().when(fileWriter).write(targetFileName1, pair.getFirstValue());
 
             // WHEN
-            this.buildPage.run(sourceFileName, targetFileName);
+            this.buildPage.run(sourceFileName, targetFileName1);
 
             // THEN
             verify(fileReader, times(1)).read(sourceFileName);
@@ -509,10 +551,10 @@ class BuildPageTest {
             verify(parserToml, times(1)).parse("draft = false");
             verify(markdownToHtmlConverter, times(1)).convert(pairFalse.getFirstValue());
             verify(fileWriter, times(1))
-                    .write(targetFileName + sourceFileName
+                    .write(targetFileName1 + sourceFileName
                             .replace(".md", ".html"), htmlContent);
             verify(htmlValidator, times(1))
-                    .validateHtml(targetFileName + sourceFileName
+                    .validateHtml(targetFileName1 + sourceFileName
                             .replace(".md", ".html"));
             verify(fileReader, times(1)).read(anyString());
             verify(fileSplitter, times(1)).split(anyString());
@@ -523,8 +565,7 @@ class BuildPageTest {
             verify(htmlValidator, times(1))
                     .validateHtml(anyString());
         } catch (Exception e) {
-            fail("An error occur and an exception was raised but it shouldn't be the case"
-                    + e.getMessage());
+            fail(e);
         }
     }
 }

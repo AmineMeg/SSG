@@ -9,13 +9,15 @@ import java.util.NoSuchElementException;
 public class TomlArrayWrapper extends TomlValueTypeWrapper implements Iterable {
 
     /**
-     * Wrappee.
+     * Wrapper.
      */
     private final TomlValueTypeWrapper[] value;
 
 
     /**
      * Constructor.
+     *
+     * @param value the value that we wrap.
      */
     public TomlArrayWrapper(TomlValueTypeWrapper... value) {
         this.value = value.clone();

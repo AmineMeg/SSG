@@ -42,7 +42,7 @@ public class MyApplicationRunner {
     }
 
     /**
-     * Return the runned command exit code.
+     * Return the run command exit code.
      *
      * @return int representing the attribute exitCode.
      */

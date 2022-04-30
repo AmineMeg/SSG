@@ -20,6 +20,8 @@ public class TomlTableWrapper extends TomlValueTypeWrapper
 
     /**
      * Constructor.
+     *
+     * @param value the value that we wrap.
      */
     public TomlTableWrapper(Map<String, TomlValueTypeWrapper> value) {
         this.value = new HashMap<>(value);

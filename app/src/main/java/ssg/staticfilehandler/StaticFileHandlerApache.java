@@ -22,6 +22,13 @@ public class StaticFileHandlerApache implements InterfaceStaticFileHandler {
      */
     private static final Logger logger = LogManager.getLogger();
 
+    /**
+     * Copy static directory.
+     *
+     * @param staticSrcDirectory static source directory.
+     * @param dstDirectory static destination directory.
+     * @throws IOException when there is a problem with the static directory.
+     */
     @Override
     public void handle(String staticSrcDirectory, String dstDirectory) throws IOException {
         if (!(staticSrcDirectory.endsWith(STATIC))) {

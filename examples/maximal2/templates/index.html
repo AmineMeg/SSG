@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8">
+    <title>{{ metadata.title }}</title>
+    <style>
+      header{
+        position: relative; text-align: center; width: 900px; margin: auto; height: 40px; background-color: lightgreen;
+      }
+      body {
+        font: 16px "Segoe UI"; margin: auto; position: relative; width: 900px; height: auto; background-color: ivory;
+      }
+      footer {
+        position: relative; text-align: left; width: 900px; margin: auto; height: 75px; background-color: whitesmoke;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div>
+        <b> <a href="./index.html"> Comment réparer un siège de toilette desserré </a> </b>
+        <ul>
+          {% for i in metadata.categories %}
+          <li style="display: inline"> <a href="{{i.url}}"> {{i.name}} </a> </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </header>
+    <div id="content">{{ content }}</div>
+  <footer>
+    {% for i in metadata.dates %}
+    Date de creation : {{i.creation}}
+    Date d'edition : {{i.lastEdit}}
+    {% endfor %}
+  </footer>
+  </body>
+</html>

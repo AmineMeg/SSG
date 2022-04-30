@@ -103,6 +103,7 @@ class CommandSsgServeTest {
     @AfterAll
     void cleanDirectories() {
         try {
+            Files.deleteIfExists(Path.of("testDir/dependencies.toml"));
             Files.deleteIfExists(Path.of("testDir/"));
             Files.deleteIfExists(Path.of("_output/"));
         } catch (IOException e) {

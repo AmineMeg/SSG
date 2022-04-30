@@ -22,8 +22,8 @@ public class MarkdownToHtmlConverterImplementation implements MarkdownToHtmlConv
     /**
      * convert CommonMark to HTML.
      *
-     * @param input CommonMark content to convert
-     * @return input content translated to HTML
+     * @param input CommonMark content to convert.
+     * @return input content translated to HTML.
      */
     @Override
     public String convert(String input) {

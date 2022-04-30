@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>SSG editor</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+</head>
+<body>
+<h1 style="margin-left: auto;
+    margin-right: auto;
+    width: 6em">SSG Editor</h1>
+<br>
+<form>
+    <label for="content"> Edit your Markdown content :</label>
+        <textarea id="content" name="content" rows="40" cols="200" style="display: block;
+    margin-left: auto;
+    margin-right: auto;">Enter text here...</textarea>
+    <br>
+    <input type="submit" onclick="alert('File saved !')" value="Save changes" style="display: block;
+    margin-left: auto;
+    margin-right: auto;">
+</form>
+<script type="text/javascript">
+function handleFormSubmit(event) {
+        event.preventDefault();
+
+        const data = new FormData(event.target);
+
+        const formJSON = Object.fromEntries(data.entries());
+
+        console.log(formJSON)
+        $.post("http://localhost:8080/", JSON.stringify(formJSON), function( data ) {
+            console.log(data)
+        });
+    }
+
+    const form = document.querySelector('form');
+    form.addEventListener('submit', handleFormSubmit);
+</script>
+</body>
+</html>
