@@ -29,7 +29,8 @@ public class FileWriterImplementation implements FileWriter {
     public void write(String file, String content) throws IOException {
         logger.info("write(): {} attempt to write file ",file);
         try {
-            Files.writeString(Path.of(file), content, StandardOpenOption.CREATE);
+            Files.writeString(Path.of(file), content,
+                    StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
             logger.info("write() : {} was successfully write ",file);
         } catch (IOException e) {
             logger.error("write(): exception raised while writing {}", file, e);

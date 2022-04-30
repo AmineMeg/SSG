@@ -1,0 +1,6 @@
+<ul id="menu">
+    <li><a href="index.html">Page d'accueil</a></li>
+{% for part in metadata.parts %}
+    <li><a href="Partie{{part.num}}.html"> Partie {{ part.num }} : {{ part.title }}</a></li>
+{% endfor %}
+</ul>

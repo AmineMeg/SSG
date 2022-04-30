@@ -11,6 +11,8 @@ public class TomlFloatWrapper extends TomlValueTypeWrapper {
 
     /**
      * Constructor.
+     *
+     * @param value the value that we wrap.
      */
     public TomlFloatWrapper(float value) {
         this.value = value;

@@ -40,6 +40,8 @@ public class HtmlValidatorW3Capi implements HtmlValidator {
                 .body(source)
                 .asString();
         String response = uniResponse.getBody();
-        logger.info(response);
+        if (!"".equals(response)) {
+            logger.info(response);
+        }
     }
 }

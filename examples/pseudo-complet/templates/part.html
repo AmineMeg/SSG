@@ -1,0 +1,25 @@
+<html lang="fr">
+    <head>
+        <title>{{ metadata.title }}</title>
+        <link href="{{metadata.css}}" rel="stylesheet">
+        <meta charset="UTF-8">
+    </head>
+    <body>
+        {% include "menu.html" %}
+        <div class="bandeau">
+            <h1>Partie {{metadata.part}} : {{ metadata.title }}</h1>
+            <h3>Chapitres dans la partie : </h3>
+            {% for chapter in metadata.chapters %}
+            Chapitre {{ chapter.num }} : {{ chapter.name }} <br/>
+            {% endfor %}
+        </div>
+
+        <div class="content">
+            <img src="../static/{{metadata.title}}.jpg" width="20%"/>
+        </div>
+        <div style="padding:10px " class="content">{{ content }}</div>
+
+        
+        
+    </body>
+</html>

@@ -6,7 +6,9 @@ package ssg.exceptions;
 public final class MetadataException extends Exception {
 
     /**
-     * Constructor.
+     * Exception constructor.
+     *
+     * @param errorMessage error message.
      */
     public MetadataException(String errorMessage) {
         super(errorMessage);

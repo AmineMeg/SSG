@@ -35,6 +35,7 @@ And uses :
 * shadowjar: 7.1.2
 * tomlj: 1.0.0
 * jackson: 2.13.2
+* jinjava: 2.6.0
 
 ## Setup
 To build this project, you can use gradlew

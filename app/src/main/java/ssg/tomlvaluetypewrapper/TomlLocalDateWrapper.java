@@ -13,6 +13,8 @@ public class TomlLocalDateWrapper extends TomlValueTypeWrapper {
 
     /**
      * Constructor.
+     *
+     * @param value the value that we wrap.
      */
     public TomlLocalDateWrapper(LocalDate value) {
         this.value = value;

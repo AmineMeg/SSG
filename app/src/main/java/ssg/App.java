@@ -20,14 +20,14 @@ public final class App {
     private static final Logger logger = LogManager.getLogger();
 
     /**
-     * Private constructor to make app an utility class.
+     * Private constructor to make app a utility class.
      */
     private App() {}
 
     /**
      * Main.
      *
-     * @param args main arguments
+     * @param args main arguments.
      */
     public static void main(String[] args) {
 

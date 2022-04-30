@@ -12,6 +12,8 @@ public class TomlBooleanWrapper extends TomlValueTypeWrapper {
 
     /**
      * Constructor.
+     *
+     * @param value the value that we wrap.
      */
     public TomlBooleanWrapper(Boolean value) {
         this.value = value;

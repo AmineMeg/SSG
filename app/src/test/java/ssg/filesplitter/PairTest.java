@@ -19,11 +19,11 @@ class PairTest {
     /**
      * Class to be tested.
      */
-    private Pair pair;
+    private Pair<String, Integer> pair;
 
     @BeforeEach
     void init() throws NullArgumentException {
-        pair = new Pair("ok", 1);
+        pair = new Pair<String, Integer>("ok", 1);
     }
 
     @Test
@@ -71,25 +71,25 @@ class PairTest {
 
     @Test
     void testIsEqualTrue() throws NullArgumentException {
-        Pair comparePair = new Pair("ok", 1);
+        Pair<String, Integer> comparePair = new Pair<String, Integer>("ok", 1);
         assertTrue(pair.isEqual(comparePair), "Test equal true");
     }
 
     @Test
     void testIsEqualFalseFirst() throws NullArgumentException {
-        Pair comparePair = new Pair("lol", 1);
+        Pair<String, Integer> comparePair = new Pair<String, Integer>("lol", 1);
         assertFalse(pair.isEqual(comparePair), "Test equal false when first value is wrong");
     }
 
     @Test
     void testIsEqualFalseSecond() throws NullArgumentException {
-        Pair comparePair = new Pair("ok", 9);
+        Pair<String, Integer> comparePair = new Pair<String, Integer>("ok", 9);
         assertFalse(pair.isEqual(comparePair), "Test equal false when second value is wrong");
     }
 
     @Test
     void testIsEqualFalseBoth() throws NullArgumentException {
-        Pair comparePair = new Pair("lol", 9);
+        Pair<String, Integer> comparePair = new Pair<String, Integer>("lol", 9);
         assertFalse(pair.isEqual(comparePair), "Test equal false when both values are wrong");
     }
 

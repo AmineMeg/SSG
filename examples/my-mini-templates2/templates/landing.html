@@ -1,0 +1,14 @@
+<html>
+  <head>
+    <title>{{ metadata.title }}</title>
+  </head>
+  <body>
+    <h1> {{content}} </h1>
+    <div>
+        {% for category in metadata.categories %}
+        <li><a href="{{ category.url }}">{{ category.name }}</a></li>
+        {% endfor %}
+    </div>
+    <div id="article">{{ content }}</div>
+  </body>
+</html>

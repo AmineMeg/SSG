@@ -1,7 +1,7 @@
 package ssg.htmlvalidator;
 
 /**
- * Interface which provide an html validator.
+ * Interface which provide a html validator.
  */
 @SuppressWarnings({"PMD.LawOfDemeter", "PMD.AvoidCatchingGenericException",
     "PMD.GuardLogStatement", "PMD.SignatureDeclareThrowsException"})

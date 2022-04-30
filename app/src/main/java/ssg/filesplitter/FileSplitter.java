@@ -11,7 +11,12 @@ import ssg.pair.Pair;
 public interface FileSplitter {
 
     /**
-     * Returns a pair (content, metadata).
+     * Split the content and the metadata into a Pair.
+     *
+     * @param buffer text of the parsed file .md.
+     * @return a Pair containing the content and the metadata separately.
+     * @throws MetadataException if the metadata is not properly declared.
+     * @throws NullArgumentException Pair has a null argument.
      */
     Pair<String, Optional<String>> split(String buffer)
             throws MetadataException, NullArgumentException;

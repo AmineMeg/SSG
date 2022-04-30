@@ -14,9 +14,15 @@ import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ssg.buildpage.BuildPage;
@@ -30,7 +36,9 @@ import ssg.tomlvaluetypewrapper.TomlValueTypeWrapper;
  * Website builder.
  */
 @SuppressWarnings({"PMD.LawOfDemeter", "PMD.AvoidCatchingGenericException",
-    "PMD.GuardLogStatement", "PMD.SignatureDeclareThrowsException"})
+    "PMD.GuardLogStatement", "PMD.SignatureDeclareThrowsException",
+    "PMD.UnusedPrivateField", "PMD.ExcessiveImports",
+    "PMD.AvoidInstantiatingObjectsInLoops"})
 @SuppressFBWarnings
 public class BuildSiteImplementation implements BuildSite {
 
@@ -43,6 +51,11 @@ public class BuildSiteImplementation implements BuildSite {
      * configuration of the website being built.
      */
     private Map<String, TomlValueTypeWrapper> config;
+
+    /**
+     * Number of jobs.
+     */
+    private int jobs = 1;
 
     /**
      * BuildPage dependency.
@@ -71,8 +84,11 @@ public class BuildSiteImplementation implements BuildSite {
     /**
      * Create the entire website from a directory.
      *
-     * @param srcDirectory source directory
-     * @param dstDirectory destination directory
+     * @param srcDirectory source directory.
+     * @param dstDirectory destination directory.
+     * @throws Exception when the source directory is not correct,
+     *      absence of the site.toml or index.md files
+     *      or if something getting wrong during the creation of the website.
      */
     @Override
     @SuppressFBWarnings
@@ -130,20 +146,47 @@ public class BuildSiteImplementation implements BuildSite {
             throws Exception {
         File[] listFiles = Objects.requireNonNull(item.listFiles());
         Arrays.sort(listFiles);
+
+        List<Callable<Void>> tasks = new ArrayList<>();
+
         for (File subItem : Objects.requireNonNull(listFiles,"Empty directory")) {
             if (!subItem.isDirectory()) {
-                try {
-                    buildPage.run(subItem.getPath(), dstDirectory);
-                    logger.info("createWebSite() : {} was successfully create", subItem.getPath());
-                } catch (Exception e) {
-                    logger.error("createWebSite() : exception raise when create web site", e);
-                    throw e;
-                }
+                Callable<Void> task = new Callable<Void>() {
+                    @Override
+                    public Void call() throws Exception {
+                        try {
+                            buildPage.run(subItem.getPath(), dstDirectory);
+                            logger.info("createWebSite() : {} was"
+                                    + " successfully create", subItem.getPath());
+                            return null;
+                        } catch (Exception e) {
+                            logger.error("createWebSite() : exception"
+                                    + " raise when create web site", e);
+                            throw e;
+                        }
+                    }
+                };
+                tasks.add(task);
             } else {
                 Files.createDirectories(Path.of(dstDirectory + subItem.getName()));
                 convertEverythingInsideContentsDirectory(subItem,
                         dstDirectory + subItem.getName() + "/");
             }
+        }
+        logger.info("createwebsite() : launching executorService");
+        ExecutorService executorService = Executors.newFixedThreadPool(jobs);
+        try {
+            List<Future<Void>> results = executorService.invokeAll(tasks);
+            for (Future<Void> futur : results) {
+                futur.get();
+            }
+        } catch (Exception e) {
+            logger.error("createwebsite() : Error occured when "
+                    + "running excutor service :  {}", e);
+            executorService.shutdown();
+            throw e;
+        } finally {
+            executorService.shutdown();
         }
     }
 
@@ -164,5 +207,15 @@ public class BuildSiteImplementation implements BuildSite {
             }
         }
         return thereIsSiteToml && thereIsContentsDirectoryAndIndexFile;
+    }
+
+    /**
+     * Sets number of jobs.
+     *
+     * @param jobs value to set
+     */
+    @Override
+    public void setJobs(int jobs) {
+        this.jobs = jobs;
     }
 }

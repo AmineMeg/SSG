@@ -1,6 +1,6 @@
 if [ "$#" -eq 0 ]
 then
-java -jar app/build/libs/ssg-all.jar
+java -jar --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED app/build/libs/ssg-all.jar
 else
-java -jar app/build/libs/ssg-all.jar "$@"
+java -jar --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED app/build/libs/ssg-all.jar "$@"
 fi

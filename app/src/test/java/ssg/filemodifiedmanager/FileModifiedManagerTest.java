@@ -4,11 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -18,8 +16,6 @@ import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-
-
 
 
 /**
@@ -47,6 +43,16 @@ class FileModifiedManagerTest {
      * path for input file.
      */
     static final String inputFilePath = "input.md";
+
+    /**
+     * path for input file.
+     */
+    static final String inputDirectory = "testInput/";
+
+    /**
+     * path for input file.
+     */
+    static final String content = "content/";
 
     /**
      * path output file.
@@ -89,24 +95,13 @@ class FileModifiedManagerTest {
     static void initTests() {
 
         try {
-            Path path = Paths.get(outputDirectory);
-            Files.createDirectories(path);
-
-            File inputFile = new File(inputFilePath);
-            boolean wentOkay = inputFile.createNewFile();
-
-            if (!wentOkay) {
-                fail("Error when creating file" + inputFilePath);
-            }
-
-            File outputFile = new File(outputDirectory + outputFilePath);
-            wentOkay = outputFile.createNewFile();
-
-            if (!wentOkay) {
-                fail("Error when creating file" + outputDirectory + outputFilePath);
-            }
-
-
+            cleanTest();
+            Files.createDirectory(Path.of(outputDirectory));
+            Files.createDirectory(Path.of(inputDirectory));
+            Files.createDirectory(Path.of(inputDirectory + content));
+            Files.createDirectory(Path.of(outputDirectory + content));
+            Files.createFile(Path.of(outputDirectory + content + outputFilePath));
+            Files.createDirectory(Path.of(inputDirectory + content + inputFilePath));
         } catch (IOException e) {
             logger.error("FileModifiedManagerTest : exception occured when "
                     + "creating tests files and directories", e);
@@ -121,49 +116,21 @@ class FileModifiedManagerTest {
      */
     @AfterAll
     static void cleanTest() {
-
-
-        File inputFile = new File(inputFilePath);
-        boolean wentOkay = inputFile.delete();
-
-        if (!wentOkay) {
-            fail("Error when deleting file file" + inputFilePath);
-        }
-
-        File outputFile = new File(outputDirectory + outputFilePath);
-        wentOkay = outputFile.delete();
-
-        if (!wentOkay) {
-            fail("Error when deleting file"
-                    + outputDirectory + outputFilePath);
-        }
-
-        File outputDir = new File(outputDirectory);
-        wentOkay = outputDir.delete();
-
-        if (!wentOkay) {
-            fail("Error when deleting directory" + outputDirectory);
+        try {
+            Files.deleteIfExists(Path.of(inputDirectory + content + inputFilePath));
+            Files.deleteIfExists(Path.of(outputDirectory + content + outputFilePath));
+            Files.deleteIfExists(Path.of(outputDirectory + content));
+            Files.deleteIfExists(Path.of(inputDirectory + content));
+            Files.deleteIfExists(Path.of(inputDirectory));
+            Files.deleteIfExists(Path.of(outputDirectory));
+        } catch (IOException e) {
+            logger.error("FileModifiedManagerTest : exception occured when "
+                    + "deleting tests files and directories", e);
+            fail(e);
         }
     }
 
 
-    /**
-     * Checking if a non-existing files exists does return false.
-     */
-    @Test
-    void readingMissingFileReturnsFalse() {
-        assertFalse(fileModifiedManagerImplementation.doesFileExists(nonExistentFilePath),
-                "doesFileExists should have returned false but got true");
-    }
-
-    /**
-     * Checking if an existing files exists should return true.
-     */
-    @Test
-    void readingExistingFileReturnsTrue() {
-        assertTrue(fileModifiedManagerImplementation.doesFileExists(inputFilePath),
-                "doesFileExists should have returned true but got false");
-    }
 
     /**
      * Testing that if input file was last modified
@@ -173,12 +140,13 @@ class FileModifiedManagerTest {
     void fileModifiedShouldReturnFalse() {
 
         try {
-            Files.setLastModifiedTime(Path.of(inputFilePath), FileTime.from(instantAnterior));
-            Files.setLastModifiedTime(Path.of(outputDirectory + outputFilePath),
+            Files.setLastModifiedTime(Path.of(inputDirectory + content
+                    + inputFilePath), FileTime.from(instantAnterior));
+            Files.setLastModifiedTime(Path.of(outputDirectory + content + outputFilePath),
                     FileTime.from(instantPosterior));
 
             assertFalse(fileModifiedManagerImplementation
-                    .wasFileModified(inputFilePath,outputDirectory),
+                    .wasFileModified(inputDirectory + content + inputFilePath,outputDirectory),
                     "wasFileModified should have returned false but got true");
         } catch (IOException e) {
 
@@ -195,12 +163,13 @@ class FileModifiedManagerTest {
     void fileModifiedShouldReturnTrue() {
 
         try {
-            Files.setLastModifiedTime(Path.of(inputFilePath), FileTime.from(instantPosterior));
-            Files.setLastModifiedTime(Path.of(outputDirectory + outputFilePath),
+            Files.setLastModifiedTime(Path.of(inputDirectory
+                    + content + inputFilePath), FileTime.from(instantPosterior));
+            Files.setLastModifiedTime(Path.of(outputDirectory + content + outputFilePath),
                     FileTime.from(instantAnterior));
 
             assertTrue(fileModifiedManagerImplementation
-                    .wasFileModified(inputFilePath,outputDirectory),
+                    .wasFileModified(inputDirectory + content + inputFilePath,outputDirectory),
                     "wasFileModified should have returned true but got false");
         } catch (IOException e) {
 
@@ -214,9 +183,9 @@ class FileModifiedManagerTest {
      * Checking if an existing files exists should return true.
      */
     @Test
-    void fileModifiedOnNonExistingFileReturnsFalse() {
+    void fileModifiedOnNonExistingFileReturnsTrue() {
         try {
-            assertFalse(fileModifiedManagerImplementation
+            assertTrue(fileModifiedManagerImplementation
                     .wasFileModified(nonExistentFilePath, outputDirectory),
                     "wasFileModified should have returned false but got true");
         } catch (IOException e) {

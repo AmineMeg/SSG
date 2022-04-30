@@ -6,7 +6,9 @@ package ssg.exceptions;
 public final class NotMarkdownException extends Exception {
 
     /**
-     * Constructor.
+     * Exception constructor.
+     *
+     * @param errorMessage error message.
      */
     public NotMarkdownException(String errorMessage) {
         super(errorMessage);

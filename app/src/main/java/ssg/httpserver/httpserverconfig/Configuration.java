@@ -17,6 +17,11 @@ public class Configuration {
     private String webroot;
 
     /**
+     * input Directory.
+     */
+    private String inputRoot;
+
+    /**
      * port getter.
      *
      * @return the current port.
@@ -45,8 +50,18 @@ public class Configuration {
 
     /**
      * Webroot setter.
+     *
+     * @param webroot represent the root directory that serve files.
      */
     public void setWebroot(String webroot) {
         this.webroot = webroot;
+    }
+
+    public String getInputRoot() {
+        return inputRoot;
+    }
+
+    public void setInputRoot(String inputRoot) {
+        this.inputRoot = inputRoot;
     }
 }

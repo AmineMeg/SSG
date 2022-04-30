@@ -18,6 +18,10 @@ public final class Pair<T, V> {
 
     /**
      * Constructor.
+     *
+     * @param value1 first value of the pair.
+     * @param value2 second value of the pair.
+     * @throws NullArgumentException if one of the argument is null.
      */
     public Pair(T value1, V value2) throws NullArgumentException {
         if (value1 == null || value2 == null) {
@@ -29,6 +33,8 @@ public final class Pair<T, V> {
 
     /**
      * First value getter.
+     *
+     * @return first value of the pair.
      */
     public T getFirstValue() {
         return value1;
@@ -45,6 +51,8 @@ public final class Pair<T, V> {
 
     /**
      * Second value getter.
+     *
+     * @return second value of the pair.
      */
     public V getSecondValue() {
         return value2;
@@ -61,6 +69,9 @@ public final class Pair<T, V> {
 
     /**
      * Compare if fields are equal.
+     *
+     * @param p the other pair that we want to compare to.
+     * @return boolean true if both pair are equals, false otherwise.
      */
     public boolean isEqual(Pair<T, V> p) {
         return value1.equals(p.value1) && value2.equals(p.value2);
