@@ -57,10 +57,19 @@ public class Configuration {
         this.webroot = webroot;
     }
 
+    /**
+     * inputRoot getter.
+     *
+     */
     public String getInputRoot() {
         return inputRoot;
     }
 
+    /**
+     * inputRoot setter.
+     *
+     * @param inputRoot represent the directory the directory where files come from.
+     */
     public void setInputRoot(String inputRoot) {
         this.inputRoot = inputRoot;
     }

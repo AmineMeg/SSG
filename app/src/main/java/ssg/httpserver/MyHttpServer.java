@@ -49,6 +49,8 @@ public class MyHttpServer {
      * Start the HTTP server.
      *
      * @param customPort customPort provide by user input.
+     * @param customDir customDir provide by user input.
+     * @param inputRoot inputRoot provide by user input.
      * @throws HttpConfigurationException if the configuration was wrong.
      * @throws IOException if there was a problem when creating the server.
      */
@@ -156,39 +158,53 @@ public class MyHttpServer {
             URI uri = exchange.getRequestURI();
             String uriFormated = uri.toString().replace("/view", "");
             File path = new File(baseDir, uriFormated);
-
             Headers h = exchange.getResponseHeaders();
-            // Could be more clever about the content type based on the filename here.
-            h.add("Content-Type", "text/html");
-            OutputStream out = exchange.getResponseBody();
-
-
-            if (path.exists()) {
-                try {
-                    Configuration conf = ConfigurationManager
-                            .getInstance()
-                            .getCurrentConfiguration();
-                    String button = "";
-                    if (!"./".equals(conf.getInputRoot())) {
-                        button = "<button type=\"button\"><a href=\"http://localhost:"
-                            + conf.getPort()
-                            + "/edit" + uriFormated + "\""
-                            + "> Edit page </a></button>";
+            if (uriFormated.endsWith(".html")) {
+                // Could be more clever about the content type based on the filename here.
+                h.add("Content-Type", "text/html");
+                OutputStream out = exchange.getResponseBody();
+                if (path.exists()) {
+                    try {
+                        Configuration conf = ConfigurationManager
+                                .getInstance()
+                                .getCurrentConfiguration();
+                        String button = "";
+                        if (!"./".equals(conf.getInputRoot())) {
+                            button = "<button type=\"button\"><a href=\"http://localhost:"
+                                    + conf.getPort()
+                                    + "/edit" + uriFormated + "\""
+                                    + "> Edit page </a></button>";
+                        }
+                        String response = button + Files.readString(path.toPath());
+                        exchange.sendResponseHeaders(200, 0);
+                        out.write(response.getBytes());
+                    } catch (HttpConfigurationException e) {
+                        logger.error("couldn't get http configuration", e);
                     }
-                    String response = button + Files.readString(path.toPath());
-                    exchange.sendResponseHeaders(200, 0);
-                    out.write(response.getBytes());
-                } catch (HttpConfigurationException e) {
-                    logger.error("couldn't get http configuration", e);
-                }
-            } else {
-                logger.error("File not found: " + path.getAbsolutePath());
+                } else {
+                    logger.error("File not found: " + path.getAbsolutePath());
 
-                exchange.sendResponseHeaders(404, 0);
-                out.write("404 File not found.".getBytes());
+                    exchange.sendResponseHeaders(404, 0);
+                    out.write("404 File not found.".getBytes());
+                }
+                out.flush();
+                out.close();
+            } else {
+                OutputStream out = exchange.getResponseBody();
+
+                if (path.exists()) {
+                    exchange.sendResponseHeaders(200, 0);
+                    Files.copy(path.toPath(), out);
+                    out.close();
+                } else {
+                    logger.error("File not found: " + path.getAbsolutePath());
+
+                    exchange.sendResponseHeaders(404, 0);
+                    out.write("404 File not found.".getBytes());
+                }
+                out.flush();
+                out.close();
             }
-            out.flush();
-            out.close();
         }
     }
 

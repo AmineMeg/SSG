@@ -1,5 +1,6 @@
 +++
 title = "Le fortin"
+image = "Le_fortin"
 draft = false
 template = "part.html"
 part = 4
@@ -13,11 +14,11 @@ chapters = [
     { num=21, name ="L'attaque"}]
 
 parts = [
-    { num = "1", title = "Le vieux boucanier"},
-    { num = "2", title = "Le maître coq"},
-    { num = "3", title = "Mon aventure à terre"},
-    { num = "4", title = "Le fortin"},
-    { num = "5", title = "Mon aventure en mer"}]
+    { num = "1", title = "Le vieux boucanier", image = "Le_vieux_boucanier"},
+    { num = "2", title = "Le maitre coq", image = "Le_maitre_coq"},
+    { num = "3", title = "Mon aventure à terre", image = "Mon_aventure_a_terre"},
+    { num = "4", title = "Le fortin", image = "Le_fortin"},
+    { num = "5", title = "Mon aventure en mer", image = "Mon_aventure_en_mer"}]
 +++
 
 ## Résumé du chapitre 16 : Comment le navire fut abandonné

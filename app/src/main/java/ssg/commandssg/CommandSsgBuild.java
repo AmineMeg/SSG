@@ -1,5 +1,7 @@
 package ssg.commandssg;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
@@ -10,6 +12,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import picocli.CommandLine;
@@ -26,6 +29,7 @@ import ssg.ioc.Container;
 /**
  * CommandSsgBuild class.
  */
+@SuppressFBWarnings
 @Generated
 @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.ImmutableField",
     "PMD.AvoidCatchingGenericException", "PMD.LawOfDemeter", "PMD.GuardLogStatement",
@@ -46,7 +50,7 @@ public class CommandSsgBuild implements Runnable {
     /**
      * templates directory.
      */
-    public static final String TEMPLATES = "/templates/";
+    public static final String TEMPLATES = "templates/";
 
     /**
      * Output Directory.
@@ -115,7 +119,18 @@ public class CommandSsgBuild implements Runnable {
         logger.info("CommandSsgBuild : ssg build subcommand called");
         //CREATING OUTPUT DIR IF IT DOES NOT EXISTS
         createOutputDir();
-        DependencyManager dependencyManager =  DependencyManager.getInstance(outputDir, inputDir
+        outputDir = Utils.addBackSlashes(outputDir);
+        inputDir = Utils.addBackSlashes(inputDir);
+
+        if (rebuildAll) {
+            try {
+                FileUtils.deleteDirectory(new File(outputDir));
+            } catch (IOException e) {
+                logger.error("CommandSsgBuild :  Error while deleting dependency file", e);
+            }
+        }
+
+        DependencyManager dependencyManager = DependencyManager.getInstance(outputDir, inputDir
                 + TEMPLATES);
 
         if (Files.exists(Path.of(dependencyManager.getOutputDirectory()
@@ -123,18 +138,8 @@ public class CommandSsgBuild implements Runnable {
             logger.info("resolveDependencies() : reading dependencies from file");
             try {
                 dependencyManager.readDependenciesFromFile();
-            } catch (IOException e) {
+            } catch (IOException | BadDependencyTomlFormatException e) {
                 logger.error("resolveDependencies() : error while reading dependencies from file");
-            } catch (BadDependencyTomlFormatException e) {
-                logger.error("resolveDependencies() : error while reading dependencies from file");
-            }
-        }
-
-        if (rebuildAll) {
-            try {
-                Files.deleteIfExists(Path.of(outputDir + "dependencies.toml"));
-            } catch (IOException e) {
-                logger.error("CommandSsgBuild :  Error while deleting  dependency file : {}", e);
             }
         }
 
@@ -145,12 +150,9 @@ public class CommandSsgBuild implements Runnable {
             //GETTING BUILD PAGE INSTANCE
             BuildPage buildPageInstance = Container.container.getInstance(BuildPage.class);
             for (String file : files) {
-                Callable<Void> task = new Callable<Void>() {
-                    @Override
-                    public Void call() throws Exception {
-                        runningBuildPageOnFile(buildPageInstance, file);
-                        return null;
-                    }
+                Callable<Void> task = () -> {
+                    runningBuildPageOnFile(buildPageInstance, file);
+                    return null;
                 };
                 tasks.add(task);
             }
@@ -164,7 +166,7 @@ public class CommandSsgBuild implements Runnable {
                 }
             } catch (Exception e) {
                 logger.error("run() : executorService was interrupted,"
-                        + " shutting down executor service {}", e);
+                        + " shutting down executor service ", e);
                 executorService.shutdown();
             } finally {
                 executorService.shutdown();
@@ -181,7 +183,7 @@ public class CommandSsgBuild implements Runnable {
         } catch (IOException e) {
             logger.error("CommandSsgBuild :  Error while writing dependency file,"
                     + "you probably built two diffrent "
-                    + "websites on the same output Dorectory : {}", e);
+                    + "websites on the same output Dorectory : ", e);
         }
     }
 
@@ -198,8 +200,8 @@ public class CommandSsgBuild implements Runnable {
 
     private void runningBuildSiteOnDirectory(BuildSite buildSiteInstance) {
         try {
-            buildSiteInstance.createWebSite(inputDir, Utils.addBackSlashes(outputDir));
-            logger.info(inputDir + " translated in " + Utils.addBackSlashes(outputDir));
+            buildSiteInstance.createWebSite(inputDir, outputDir);
+            logger.info(inputDir + " translated in " + outputDir);
         } catch (Exception e) {
             logger.error("There was a problem with command build", e);
         }
@@ -207,8 +209,8 @@ public class CommandSsgBuild implements Runnable {
 
     private void runningBuildPageOnFile(BuildPage buildPageInstance, String file) {
         try {
-            buildPageInstance.run(file, Utils.addBackSlashes(outputDir));
-            logger.info(file + " translated in " + Utils.addBackSlashes(outputDir));
+            buildPageInstance.run(file, outputDir);
+            logger.info(file + " translated in " + outputDir);
         } catch (Exception e) {
             logger.error("There was a problem for the command build", e);
         }
