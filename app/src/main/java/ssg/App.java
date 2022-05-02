@@ -4,6 +4,7 @@
 
 package ssg;
 
+import org.apache.log4j.BasicConfigurator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ssg.myapplicationrunner.MyApplicationRunner;
@@ -13,6 +14,11 @@ import ssg.myapplicationrunner.MyApplicationRunner;
  */
 @Generated
 public final class App {
+
+    static {
+        System.setProperty("org.apache.commons.logging.Log",
+                "org.apache.commons.logging.impl.NoOpLog");
+    }
 
     /**
      * Logger.
@@ -30,7 +36,7 @@ public final class App {
      * @param args main arguments.
      */
     public static void main(String[] args) {
-
+        BasicConfigurator.configure();
         logger.info("Launch app");
         MyApplicationRunner applicationRunner = new MyApplicationRunner(args);
         applicationRunner.run();

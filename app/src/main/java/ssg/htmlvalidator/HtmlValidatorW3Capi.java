@@ -16,7 +16,7 @@ public class HtmlValidatorW3Capi implements HtmlValidator {
     /**
      * Log4J Logger.
      */
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger logger = LogManager.getLogger(HtmlValidatorW3Capi.class);
 
     /**
      * Verifies that an HTML content is valid.

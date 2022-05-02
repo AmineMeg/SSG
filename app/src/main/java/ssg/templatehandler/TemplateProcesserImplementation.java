@@ -83,6 +83,8 @@ public class TemplateProcesserImplementation implements TemplateProcesser {
 
         /**
          * Constructor must set baseDir.
+         *
+         * @param baseDir base directory.
          */
         public ListFilesFunction(String baseDir) {
             this.baseDir = Path.of(baseDir).normalize().toString();
@@ -94,6 +96,7 @@ public class TemplateProcesserImplementation implements TemplateProcesser {
          * @param directory directory to list.
          * @param rec set to true for recursive listing.
          * @return list of files inside given directory.
+         * @throws TemplateProcesserException when there's any problem.
          */
         @SuppressFBWarnings // false positive for potential path traversal vulnerability
         @SuppressWarnings({"PMD.GuardLogStatement", "PMD.LawOfDemeter"})
@@ -136,6 +139,7 @@ public class TemplateProcesserImplementation implements TemplateProcesser {
          * @param baseDir reference directory such that calls to list_files("example", bool)
          *     will refer to baseDir/example.
          * @return list_files(String, boolean) function definition.
+         * @throws TemplateProcesserException when there's any problem.
          */
         public static synchronized ELFunctionDefinition getFunctionDefinition(String baseDir)
                 throws TemplateProcesserException {

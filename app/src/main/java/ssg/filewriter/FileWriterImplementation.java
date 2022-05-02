@@ -15,7 +15,7 @@ public class FileWriterImplementation implements FileWriter {
     /**
      * log4J.
      */
-    private static final Logger logger = LogManager.getLogger(FileWriterImplementation.class);
+    private static final Logger logger = LogManager.getLogger();
 
     /**
      * write string content in file text to disk.

@@ -17,6 +17,8 @@ public final class TemplateProcesserException extends Exception {
 
     /**
      * Exception constructor for stack trace preservation.
+     *
+     * @param exn Exception.
      */
     public TemplateProcesserException(Exception exn) {
         super(exn);

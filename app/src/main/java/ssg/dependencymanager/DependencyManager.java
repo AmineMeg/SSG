@@ -52,7 +52,7 @@ public final class DependencyManager  {
     /**
      * Logger.
      */
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger logger = LogManager.getLogger(DependencyManager.class);
 
     /**
      * Logger.

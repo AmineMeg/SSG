@@ -45,7 +45,7 @@ public class BuildSiteImplementation implements BuildSite {
     /**
      * Log4J Logger.
      */
-    public static final Logger logger = LogManager.getLogger(BuildSiteImplementation.class);
+    public static final Logger logger = LogManager.getLogger();
 
     /**
      * configuration of the website being built.
