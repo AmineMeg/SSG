@@ -13,7 +13,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ssg.config.SiteStructureVariable;
 import ssg.dependencymanager.DependencyManager;
-import ssg.exceptions.BadDependencyTomlFormatException;
 import ssg.exceptions.NotMarkdownException;
 import ssg.filereader.FileReader;
 import ssg.filesplitter.FileSplitter;
@@ -103,7 +102,6 @@ public class BuildPageImplementation implements BuildPage {
             throw new NotMarkdownException("Trying to convert a file that is not a markdown");
         }
         try {
-
             convert(sourceFilePath,outputDirectory);
         } catch (Exception e) {
             logger.error("run(): There was an issue during the conversion ", e);
@@ -123,7 +121,7 @@ public class BuildPageImplementation implements BuildPage {
                 this.fileSplitter.split(sourceRawContent);
 
 
-        logger.info("run(): Attempt to parse metadata for  file {}  ",
+        logger.info("run(): Attempt to parse metadata for file {}  ",
                 sourceFilePath);
 
         Map<String, TomlValueTypeWrapper> metadata = null;
@@ -136,7 +134,7 @@ public class BuildPageImplementation implements BuildPage {
         }
 
         //IF THE DOCUMENT IS NOT A DRAFT THEN WE COMPUTE IT
-        if (isDraft(metadata)) {
+        if (isNotDraft(metadata)) {
             resolveDependencies(sourceFilePath, metadata);
             if (dependencyManager.isRecomputeRequired(sourceFilePath)) {
                 compute(sourceFilePath, outputDirectory, sourceSplittedContent, metadata);
@@ -150,7 +148,7 @@ public class BuildPageImplementation implements BuildPage {
         }
     }
 
-    private boolean isDraft(Map<String, TomlValueTypeWrapper> metadata) {
+    private boolean isNotDraft(Map<String, TomlValueTypeWrapper> metadata) {
         return (metadata != null
                 && metadata.containsKey("draft")
                 && metadata.get("draft").toString().equals("false"))
@@ -173,13 +171,13 @@ public class BuildPageImplementation implements BuildPage {
         String htmlContent = this.markdownToHtmlConverter
                 .convert(sourceSplittedContent.getFirstValue());
 
-        logger.info("run(): creating PageDraft instance for  file {}  ", sourceFilePath);
+        logger.info("run(): creating PageDraft instance for file {}  ", sourceFilePath);
         PageDraft pageDraft = new PageDraft(metadata, htmlContent, fileName.replace(".md", ""));
 
-        logger.info("run(): handling potential template for  file {}  ", sourceFilePath);
+        logger.info("run(): handling potential template for file {}  ", sourceFilePath);
         String resolvedPage = templateHandler.handle(pageDraft, templatesDir.toString());
 
-        logger.info("run(): writing converted  file {}  ", sourceFilePath);
+        logger.info("run(): writing converted file {}  ", sourceFilePath);
         String fileOutputName = fileName.replace(".md", ".html");
 
         this.fileWriter.write(outputDirectory + fileOutputName, resolvedPage);

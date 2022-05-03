@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -151,22 +152,7 @@ public class BuildSiteImplementation implements BuildSite {
 
         for (File subItem : Objects.requireNonNull(listFiles,"Empty directory")) {
             if (!subItem.isDirectory()) {
-                Callable<Void> task = new Callable<Void>() {
-                    @Override
-                    public Void call() throws Exception {
-                        try {
-                            buildPage.run(subItem.getPath(), dstDirectory);
-                            logger.info("createWebSite() : {} was"
-                                    + " successfully create", subItem.getPath());
-                            return null;
-                        } catch (Exception e) {
-                            logger.error("createWebSite() : exception"
-                                    + " raise when create web site", e);
-                            throw e;
-                        }
-                    }
-                };
-                tasks.add(task);
+                addTasks(dstDirectory, tasks, subItem);
             } else {
                 Files.createDirectories(Path.of(dstDirectory + subItem.getName()));
                 convertEverythingInsideContentsDirectory(subItem,
@@ -175,6 +161,11 @@ public class BuildSiteImplementation implements BuildSite {
         }
         logger.info("createwebsite() : launching executorService");
         ExecutorService executorService = Executors.newFixedThreadPool(jobs);
+        executeTasks(tasks, executorService);
+    }
+
+    private void executeTasks(List<Callable<Void>> tasks, ExecutorService executorService)
+            throws InterruptedException, ExecutionException {
         try {
             List<Future<Void>> results = executorService.invokeAll(tasks);
             for (Future<Void> futur : results) {
@@ -182,12 +173,28 @@ public class BuildSiteImplementation implements BuildSite {
             }
         } catch (Exception e) {
             logger.error("createwebsite() : Error occured when "
-                    + "running excutor service :  {}", e);
+                    + "running excutor service : ", e);
             executorService.shutdown();
             throw e;
         } finally {
             executorService.shutdown();
         }
+    }
+
+    private void addTasks(String dstDirectory, List<Callable<Void>> tasks, File subItem) {
+        Callable<Void> task = () -> {
+            try {
+                buildPage.run(subItem.getPath(), dstDirectory);
+                logger.info("createWebSite() : {} was"
+                        + " successfully create", subItem.getPath());
+                return null;
+            } catch (Exception e) {
+                logger.error("createWebSite() : exception"
+                        + " raise when create web site", e);
+                throw e;
+            }
+        };
+        tasks.add(task);
     }
 
     private boolean isConvertible(File folder) {
@@ -212,7 +219,7 @@ public class BuildSiteImplementation implements BuildSite {
     /**
      * Sets number of jobs.
      *
-     * @param jobs value to set
+     * @param jobs value to set.
      */
     @Override
     public void setJobs(int jobs) {
