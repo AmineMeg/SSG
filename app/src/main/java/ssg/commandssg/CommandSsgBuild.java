@@ -122,6 +122,42 @@ public class CommandSsgBuild implements Runnable {
         outputDir = Utils.addBackSlashes(outputDir);
         inputDir = Utils.addBackSlashes(inputDir);
 
+        rebuildAllIfNeeded();
+
+        DependencyManager dependencyManager = DependencyManager.getInstance(outputDir, inputDir
+                + TEMPLATES);
+        resolveDependencies(dependencyManager);
+
+        List<Callable<Void>> tasks = new ArrayList<>();
+
+        //FILES TO TRANSLATE WERE SPECIFIED SO WE CALL BUILD PAGE ON EACH OF THEM
+        if (files != null) {
+            //GETTING BUILD PAGE INSTANCE
+            BuildPage buildPageInstance = Container.container.getInstance(BuildPage.class);
+            addTasks(tasks, buildPageInstance);
+            logger.info("run(): Launching executor service");
+            ExecutorService executorService = Executors.newFixedThreadPool(jobs);
+            executeTasks(tasks, executorService);
+
+        } else {
+            BuildSite buildSiteInstance = Container.container.getInstance(BuildSite.class);
+            buildSiteInstance.setJobs(jobs);
+            runningBuildSiteOnDirectory(buildSiteInstance);
+        }
+        writeDependenciesInFile(dependencyManager);
+    }
+
+    private void writeDependenciesInFile(DependencyManager dependencyManager) {
+        try {
+            dependencyManager.writeDependenciesInFile();
+        } catch (IOException e) {
+            logger.error("CommandSsgBuild :  Error while writing dependency file,"
+                    + "you probably built two diffrent "
+                    + "websites on the same output Dorectory : ", e);
+        }
+    }
+
+    private void rebuildAllIfNeeded() {
         if (rebuildAll) {
             try {
                 FileUtils.deleteDirectory(new File(outputDir));
@@ -129,10 +165,9 @@ public class CommandSsgBuild implements Runnable {
                 logger.error("CommandSsgBuild :  Error while deleting dependency file", e);
             }
         }
+    }
 
-        DependencyManager dependencyManager = DependencyManager.getInstance(outputDir, inputDir
-                + TEMPLATES);
-
+    private void resolveDependencies(DependencyManager dependencyManager) {
         if (Files.exists(Path.of(dependencyManager.getOutputDirectory()
                 + SiteStructureVariable.DEPENDENCIES_FILE))) {
             logger.info("resolveDependencies() : reading dependencies from file");
@@ -142,48 +177,31 @@ public class CommandSsgBuild implements Runnable {
                 logger.error("resolveDependencies() : error while reading dependencies from file");
             }
         }
+    }
 
-        List<Callable<Void>> tasks = new ArrayList<>();
-
-        //FILES TO TRANSLATE WERE SPECIFIED SO WE CALL BUILD PAGE ON EACH OF THEM
-        if (files != null) {
-            //GETTING BUILD PAGE INSTANCE
-            BuildPage buildPageInstance = Container.container.getInstance(BuildPage.class);
-            for (String file : files) {
-                Callable<Void> task = () -> {
-                    runningBuildPageOnFile(buildPageInstance, file);
-                    return null;
-                };
-                tasks.add(task);
-            }
-            logger.info("run(): Launching executor service");
-            ExecutorService executorService = Executors.newFixedThreadPool(jobs);
-            try {
-                executorService.invokeAll(tasks);
-                List<Future<Void>> results = executorService.invokeAll(tasks);
-                for (Future<Void> futur : results) {
-                    futur.get();
-                }
-            } catch (Exception e) {
-                logger.error("run() : executorService was interrupted,"
-                        + " shutting down executor service ", e);
-                executorService.shutdown();
-            } finally {
-                executorService.shutdown();
-            }
-
-        } else {
-            BuildSite buildSiteInstance = Container.container.getInstance(BuildSite.class);
-            buildSiteInstance.setJobs(jobs);
-            runningBuildSiteOnDirectory(buildSiteInstance);
-        }
-
+    private void executeTasks(List<Callable<Void>> tasks, ExecutorService executorService) {
         try {
-            dependencyManager.writeDependenciesInFile();
-        } catch (IOException e) {
-            logger.error("CommandSsgBuild :  Error while writing dependency file,"
-                    + "you probably built two diffrent "
-                    + "websites on the same output Dorectory : ", e);
+            executorService.invokeAll(tasks);
+            List<Future<Void>> results = executorService.invokeAll(tasks);
+            for (Future<Void> futur : results) {
+                futur.get();
+            }
+        } catch (Exception e) {
+            logger.error("run() : executorService was interrupted,"
+                    + " shutting down executor service ", e);
+            executorService.shutdown();
+        } finally {
+            executorService.shutdown();
+        }
+    }
+
+    private void addTasks(List<Callable<Void>> tasks, BuildPage buildPageInstance) {
+        for (String file : files) {
+            Callable<Void> task = () -> {
+                runningBuildPageOnFile(buildPageInstance, file);
+                return null;
+            };
+            tasks.add(task);
         }
     }
 

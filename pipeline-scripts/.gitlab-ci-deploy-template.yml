@@ -2,9 +2,9 @@
   script:
     - |
       curl --header "PRIVATE-TOKEN: 3AZgFN33XZQpQahwmzo4" \
-           --data name="SSG v1.4.1" \
+           --data name="SSG v1.4.2" \
            --data url=$ARTIFACTS_URL \
-           --data tag_name="v1.4.1" \
-           --data description="Fix de l'option --rebuild-all et affichage des images dans le serveur." \
+           --data tag_name="v1.4.2" \
+           --data description="Fix de l'édition en ligne et rendu vidéo" \
            --data ref="master" \
            --request POST https://gaufre.informatique.univ-paris-diderot.fr/api/v4/projects/${CI_PROJECT_ID}/releases/

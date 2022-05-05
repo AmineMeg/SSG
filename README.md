@@ -55,3 +55,8 @@ $ ./gradlew check
 ```
 
 To run any more specific task check the build.gradle file.
+
+## Presentation video (Click on any link) 
+
+* [Pitchy](https://app.pitchy.fr/share?id=vodPNeLo)
+* [Youtube](https://youtu.be/SFpZN9Tsj2w)

@@ -60,6 +60,24 @@ public class MyHttpServer {
         String configFilePath = "app/src/main/resources/http.json";
         ConfigurationManager.getInstance().loadConfigurationFile(configFilePath);
         Configuration conf = ConfigurationManager.getInstance().getCurrentConfiguration();
+        checkArguments(customPort, customDir, inputRoot, conf);
+
+        logger.info("Server starting...");
+        logger.info("listening on Port: " + conf.getPort());
+        logger.info("Server currently running on: http://localhost:" + conf.getPort() + "/");
+
+        server = HttpServer.create(new InetSocketAddress(conf.getPort()), 0);
+        server.createContext("/", new MenuHandler());
+        server.createContext("/view", new FileHandler(conf.getWebroot()));
+        server.createContext("/edit", new EditHandler(conf.getInputRoot()));
+        server.createContext("/save", new SaveHandler(conf.getInputRoot(), conf.getWebroot()));
+        server.start();
+    }
+
+    private void checkArguments(String customPort,
+                                String customDir,
+                                String inputRoot,
+                                Configuration conf) {
         if (!"".equals(customPort)) {
             try {
                 int customPortFormat = Integer.parseInt(customPort);
@@ -80,17 +98,6 @@ public class MyHttpServer {
             conf.setWebroot(customDir);
         }
         conf.setInputRoot(inputRoot);
-
-        logger.info("Server starting...");
-        logger.info("listening on Port: " + conf.getPort());
-        logger.info("Server currently running on: http://localhost:" + conf.getPort() + "/");
-
-        server = HttpServer.create(new InetSocketAddress(conf.getPort()), 0);
-        server.createContext("/", new MenuHandler());
-        server.createContext("/view", new FileHandler(conf.getWebroot()));
-        server.createContext("/edit", new EditHandler(conf.getInputRoot()));
-        server.createContext("/save", new SaveHandler(conf.getInputRoot(), conf.getWebroot()));
-        server.start();
     }
 
     /**
@@ -160,51 +167,60 @@ public class MyHttpServer {
             File path = new File(baseDir, uriFormated);
             Headers h = exchange.getResponseHeaders();
             if (uriFormated.endsWith(".html")) {
-                // Could be more clever about the content type based on the filename here.
-                h.add("Content-Type", "text/html");
-                OutputStream out = exchange.getResponseBody();
-                if (path.exists()) {
-                    try {
-                        Configuration conf = ConfigurationManager
-                                .getInstance()
-                                .getCurrentConfiguration();
-                        String button = "";
-                        if (!"./".equals(conf.getInputRoot())) {
-                            button = "<button type=\"button\"><a href=\"http://localhost:"
-                                    + conf.getPort()
-                                    + "/edit" + uriFormated + "\""
-                                    + "> Edit page </a></button>";
-                        }
-                        String response = button + Files.readString(path.toPath());
-                        exchange.sendResponseHeaders(200, 0);
-                        out.write(response.getBytes());
-                    } catch (HttpConfigurationException e) {
-                        logger.error("couldn't get http configuration", e);
-                    }
-                } else {
-                    logger.error("File not found: " + path.getAbsolutePath());
+                handleHtmlFile(exchange, uriFormated, path, h);
+            } else {
+                handleOtherFile(exchange, path);
+            }
+        }
 
-                    exchange.sendResponseHeaders(404, 0);
-                    out.write("404 File not found.".getBytes());
-                }
-                out.flush();
+        private void handleOtherFile(HttpExchange exchange, File path) throws IOException {
+            OutputStream out = exchange.getResponseBody();
+
+            if (path.exists()) {
+                exchange.sendResponseHeaders(200, 0);
+                Files.copy(path.toPath(), out);
                 out.close();
             } else {
-                OutputStream out = exchange.getResponseBody();
+                logger.error("File not found: " + path.getAbsolutePath());
 
-                if (path.exists()) {
-                    exchange.sendResponseHeaders(200, 0);
-                    Files.copy(path.toPath(), out);
-                    out.close();
-                } else {
-                    logger.error("File not found: " + path.getAbsolutePath());
-
-                    exchange.sendResponseHeaders(404, 0);
-                    out.write("404 File not found.".getBytes());
-                }
-                out.flush();
-                out.close();
+                exchange.sendResponseHeaders(404, 0);
+                out.write("404 File not found.".getBytes());
             }
+            out.flush();
+            out.close();
+        }
+
+        private void handleHtmlFile(HttpExchange exchange, String uriFormated, File path, Headers h)
+                throws IOException {
+            // Could be more clever about the content type based on the filename here.
+            h.add("Content-Type", "text/html");
+            OutputStream out = exchange.getResponseBody();
+            if (path.exists()) {
+                try {
+                    Configuration conf = ConfigurationManager
+                            .getInstance()
+                            .getCurrentConfiguration();
+                    String button = "";
+                    if (!"./".equals(conf.getInputRoot())) {
+                        button = "<button type=\"button\"><a href=\"http://localhost:"
+                                + conf.getPort()
+                                + "/edit" + uriFormated + "\""
+                                + "> Edit page </a></button>";
+                    }
+                    String response = button + Files.readString(path.toPath());
+                    exchange.sendResponseHeaders(200, 0);
+                    out.write(response.getBytes());
+                } catch (HttpConfigurationException e) {
+                    logger.error("couldn't get http configuration", e);
+                }
+            } else {
+                logger.error("File not found: " + path.getAbsolutePath());
+
+                exchange.sendResponseHeaders(404, 0);
+                out.write("404 File not found.".getBytes());
+            }
+            out.flush();
+            out.close();
         }
     }
 
@@ -240,21 +256,7 @@ public class MyHttpServer {
 
             if (file.exists()) {
                 try {
-                    Configuration conf = ConfigurationManager
-                            .getInstance()
-                            .getCurrentConfiguration();
-                    String formSubmit =  "http://localhost:" + conf.getPort() + uri.toString()
-                            .replace("/edit", "/save")
-                            .replace(".html", ".md");
-                    String htmlEditor = Files.readString(
-                            Path.of("app/src/main/resources/frontend/mdeditor.html")
-                    );
-                    String htmlEditorAfterUpdate = htmlEditor
-                            .replace("http://localhost:8080/",
-                                    formSubmit)
-                            .replace("Enter text here...", Files.readString(path));
-                    exchange.sendResponseHeaders(200, 0);
-                    out.write(htmlEditorAfterUpdate.getBytes());
+                    sendEditorForm(exchange, uri, path, out);
                 } catch (HttpConfigurationException e) {
                     logger.error("couldn't get http configuration", e);
                 }
@@ -265,6 +267,25 @@ public class MyHttpServer {
             }
             out.flush();
             out.close();
+        }
+
+        private void sendEditorForm(HttpExchange exchange, URI uri, Path path, OutputStream out)
+                throws HttpConfigurationException, IOException {
+            Configuration conf = ConfigurationManager
+                    .getInstance()
+                    .getCurrentConfiguration();
+            String formSubmit =  "http://localhost:" + conf.getPort() + uri.toString()
+                    .replace("/edit", "/save")
+                    .replace(".html", ".md");
+            String htmlEditor = Files.readString(
+                    Path.of("app/src/main/resources/frontend/mdeditor.html")
+            );
+            String htmlEditorAfterUpdate = htmlEditor
+                    .replace("http://localhost:8080/",
+                            formSubmit)
+                    .replace("Enter text here...", Files.readString(path));
+            exchange.sendResponseHeaders(200, 0);
+            out.write(htmlEditorAfterUpdate.getBytes());
         }
     }
 
@@ -291,24 +312,29 @@ public class MyHttpServer {
                 ObjectMapper mapper = new ObjectMapper();
                 Map jsonMap = mapper.readValue(inputStream, Map.class);
                 String formatedFileName = uri.toString()
-                        .replace("/save", "");
+                        .replace("/save/", "");
                 File file = new File(inputDir, formatedFileName);
                 Path path = Path.of(inputDir + formatedFileName);
                 if (file.exists()) {
-                    Files.writeString(path, jsonMap.get("content").toString());
-                    BuildPage buildPage = Container.container.getInstance(BuildPage.class);
-                    try {
-                        buildPage.run(inputDir + formatedFileName,
-                                outputDir + SiteStructureVariable.CONTENTS);
-                    } catch (Exception e) {
-                        logger.error("run(): There was an issue during the conversion ", e);
-                    }
+                    saveAndBuildNewContentToFile(jsonMap, formatedFileName, path);
                     exchange.sendResponseHeaders(200, 0);
                 } else {
                     logger.error("File not found: " + file.getAbsolutePath());
                     exchange.sendResponseHeaders(404, 0);
                 }
                 inputStream.close();
+            }
+        }
+
+        private void saveAndBuildNewContentToFile(Map jsonMap, String formatedFileName, Path path)
+                throws IOException {
+            Files.writeString(path, jsonMap.get("content").toString());
+            BuildPage buildPage = Container.container.getInstance(BuildPage.class);
+            try {
+                buildPage.run(inputDir + formatedFileName,
+                        outputDir + SiteStructureVariable.CONTENTS);
+            } catch (Exception e) {
+                logger.error("run(): There was an issue during the conversion ", e);
             }
         }
     }

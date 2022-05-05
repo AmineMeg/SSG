@@ -128,17 +128,68 @@ public class CommandSsgServe implements Runnable {
         outputDir = Utils.addBackSlashes(outputDir);
         inputDir = Utils.addBackSlashes(inputDir);
 
-        if (rebuildAll) {
-            try {
-                FileUtils.deleteDirectory(new File(outputDir));
-            } catch (IOException e) {
-                logger.error("CommandSsgServe : Error while deleting dependency file : ", e);
-            }
-        }
+        rebuildAllIfNeeded();
 
         DependencyManager dependencyManager =  DependencyManager.getInstance(outputDir, inputDir
                 + TEMPLATES);
+        resolveDependencies(dependencyManager);
 
+        List<Callable<Void>> tasks = new ArrayList<>();
+
+        //FILES TO TRANSLATE WERE SPECIFIED SO WE CALL BUILD PAGE ON EACH OF THEM
+        if (files != null) {
+            //GETTING BUILD PAGE INSTANCE
+            BuildPage buildPageInstance = Container.container.getInstance(BuildPage.class);
+            addTasks(tasks, buildPageInstance);
+            logger.info("run(): Launching executor service");
+            executeTasks(tasks);
+        } else {
+            BuildSite buildSiteInstance = Container.container.getInstance(BuildSite.class);
+            buildSiteInstance.setJobs(jobs);
+            runningBuildSiteOnDirectory(buildSiteInstance);
+        }
+        writeDependencyInFile(dependencyManager);
+        launchServer();
+    }
+
+    private void writeDependencyInFile(DependencyManager dependencyManager) {
+        try {
+            dependencyManager.writeDependenciesInFile();
+        } catch (IOException e) {
+            logger.error("CommandSsgBuild :  Error while writing dependency file,"
+                    + "you probably built two diffrent"
+                    + " websites on the same output Dorectory", e);
+        }
+    }
+
+    private void executeTasks(List<Callable<Void>> tasks) {
+        ExecutorService executorService = Executors.newFixedThreadPool(jobs);
+        try {
+            executorService.invokeAll(tasks);
+            List<Future<Void>> results = executorService.invokeAll(tasks);
+            for (Future<Void> futur : results) {
+                futur.get();
+            }
+        } catch (Exception e) {
+            logger.error("run() : executorService was interrupted,"
+                    + " shutting down executor service", e);
+            executorService.shutdown();
+        } finally {
+            executorService.shutdown();
+        }
+    }
+
+    private void addTasks(List<Callable<Void>> tasks, BuildPage buildPageInstance) {
+        for (String file : files) {
+            Callable<Void> task = () -> {
+                runningBuildPageOnFile(buildPageInstance, file);
+                return null;
+            };
+            tasks.add(task);
+        }
+    }
+
+    private void resolveDependencies(DependencyManager dependencyManager) {
         if (Files.exists(Path.of(dependencyManager.getOutputDirectory()
                 + SiteStructureVariable.DEPENDENCIES_FILE))) {
             logger.info("resolveDependencies() : reading dependencies from file");
@@ -148,53 +199,16 @@ public class CommandSsgServe implements Runnable {
                 logger.error("resolveDependencies() : error while reading dependencies from file");
             }
         }
+    }
 
-        logger.info("CommandSsgBuild : ssg build subcommand called");
-
-        List<Callable<Void>> tasks = new ArrayList<>();
-
-        //FILES TO TRANSLATE WERE SPECIFIED SO WE CALL BUILD PAGE ON EACH OF THEM
-        if (files != null) {
-            //GETTING BUILD PAGE INSTANCE
-            BuildPage buildPageInstance = Container.container.getInstance(BuildPage.class);
-            for (String file : files) {
-                Callable<Void> task = () -> {
-                    runningBuildPageOnFile(buildPageInstance, file);
-                    return null;
-                };
-                tasks.add(task);
-            }
-            logger.info("run(): Launching executor service");
-            ExecutorService executorService = Executors.newFixedThreadPool(jobs);
+    private void rebuildAllIfNeeded() {
+        if (rebuildAll) {
             try {
-                executorService.invokeAll(tasks);
-                List<Future<Void>> results = executorService.invokeAll(tasks);
-                for (Future<Void> futur : results) {
-                    futur.get();
-                }
-            } catch (Exception e) {
-                logger.error("run() : executorService was interrupted,"
-                        + " shutting down executor service", e);
-                executorService.shutdown();
-            } finally {
-                executorService.shutdown();
+                FileUtils.deleteDirectory(new File(outputDir));
+            } catch (IOException e) {
+                logger.error("CommandSsgServe : Error while deleting dependency file : ", e);
             }
-
-        } else {
-            BuildSite buildSiteInstance = Container.container.getInstance(BuildSite.class);
-            buildSiteInstance.setJobs(jobs);
-            runningBuildSiteOnDirectory(buildSiteInstance);
         }
-
-        try {
-            dependencyManager.writeDependenciesInFile();
-        } catch (IOException e) {
-            logger.error("CommandSsgBuild :  Error while writing dependency file,"
-                    + "you probably built two diffrent"
-                    + " websites on the same output Dorectory", e);
-        }
-
-        launchServer();
     }
 
     private void launchServer() {
@@ -209,11 +223,11 @@ public class CommandSsgServe implements Runnable {
     private void createOutputDir() {
         try {
             Files.createDirectories(Path.of(outputDir));
-            logger.info("CommandSsgBuild : " + outputDir + " directory created ");
+            logger.info("CommandSsgServe : " + outputDir + " directory created ");
         } catch (FileAlreadyExistsException e) {
-            logger.info("CommandSsgBuild : " + outputDir + " already exists, no action required");
+            logger.info("CommandSsgServe : " + outputDir + " already exists, no action required");
         } catch (IOException e) {
-            logger.error("CommandSsgBuild : There was a when we create directories", e);
+            logger.error("CommandSsgServe : There was a when we create directories", e);
         }
     }
 
