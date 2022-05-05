@@ -60,6 +60,7 @@ public class Configuration {
     /**
      * inputRoot getter.
      *
+     * @return the user input root directory.
      */
     public String getInputRoot() {
         return inputRoot;
